@@ -64,7 +64,13 @@
     #jt .tyre { border: 1px solid var(--jt-line); border-radius: 8px; padding: 6px 8px; min-width: 0; }
     #jt .tyre small { display: block; font-size: 0.72em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #jt .tyre.low { border-color: var(--jt-orange); color: var(--jt-orange); }
-    #jt .map { display: block; width: 100%; height: 170px; border: 0; border-radius: 8px; background: var(--jt-line); }
+    #jt .map { display: block; position: relative; overflow: hidden; width: 100%; height: 170px; border: 0; border-radius: 8px; background: var(--jt-line); }
+    #jt .map[hidden] { display: none; }
+    #jt #tiles img { position: absolute; width: 256px; height: 256px; max-width: none; }
+    #jt .pin { position: absolute; left: 50%; top: 50%; width: 24px; height: 32px; transform: translate(-50%, -100%); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+    #jt .pin path { fill: var(--jt-accent); stroke: #FFFFFF; stroke-width: 1.5; }
+    #jt .pin circle { fill: #FFFFFF; }
+    #jt .map .attr { position: absolute; right: 0; bottom: 0; padding: 1px 6px; font-size: 11px; font-weight: 400; color: #333333; background: rgba(255, 255, 255, 0.8); border-top-left-radius: 4px; text-decoration: none; }
     #jt .where { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 7px; font-size: 0.78em; }
     #jt .where span { opacity: 0.7; min-width: 0; overflow-wrap: anywhere; }
     #jt .where a { flex: none; color: var(--jt-accent); text-decoration: none; font-weight: 600; }
@@ -126,7 +132,12 @@
         <div class="card" id="tyreCard"></div>
         <div class="card" id="mapCard">
             <h3>Standort</h3>
-            <iframe class="map" id="map" title="Karte" loading="lazy" referrerpolicy="no-referrer"></iframe>
+            <div class="map" id="map">
+                <div id="tiles"></div>
+                <svg class="pin" viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1C6 1 2 5.5 2 11c0 7.5 10 20 10 20s10-12.5 10-20C22 5.5 18 1 12 1z"/><circle cx="12" cy="11" r="4"/></svg>
+                <a class="attr" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap</a>
+            </div>
+            <iframe class="map" id="mapFrame" title="Karte" hidden referrerpolicy="no-referrer"></iframe>
             <div class="where"><span id="where"></span><a id="mapLink" target="_blank" rel="noopener noreferrer">Karte öffnen</a></div>
         </div>
     </div>
@@ -155,6 +166,9 @@
     let state = null;
     let selected = null;
     let mapKey = '';
+    let mapPos = null;
+    let tilesKey = '';
+    let tilesFailed = false;
     let busyTimer = 0;
     const $ = id => document.getElementById(id);
     const CAR = '<path d="M3 17v-4l3-1 3-5h6l4 5 2 1v4z"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>';
@@ -280,19 +294,69 @@
         renderMap(s);
     }
 
-    // the map is only reloaded when the position changes
+    // map from OpenStreetMap tiles with a short credit; redrawn only when position or size change
     function renderMap(s) {
         $('mapCard').style.display = s.position ? '' : 'none';
-        if (!s.position) { mapKey = ''; $('map').removeAttribute('src'); return; }
+        if (!s.position) {
+            mapKey = ''; mapPos = null; tilesKey = '';
+            $('tiles').replaceChildren();
+            $('mapFrame').removeAttribute('src');
+            return;
+        }
         const lat = Number(s.position.lat), lon = Number(s.position.lon);
-        $('where').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5) + ' · ' + stamp(s.lastReport);
         const key = lat.toFixed(5) + ',' + lon.toFixed(5);
+        $('where').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5) + ' · ' + stamp(s.lastReport);
         if (key === mapKey) return;
         mapKey = key;
-        const d = 0.004;
-        const bbox = [lon - d, lat - d, lon + d, lat + d].map(x => x.toFixed(5)).join(',');
-        $('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + encodeURIComponent(key);
+        mapPos = { lat, lon };
         $('mapLink').href = 'https://www.openstreetmap.org/?mlat=' + lat.toFixed(5) + '&mlon=' + lon.toFixed(5) + '#map=16/' + lat.toFixed(5) + '/' + lon.toFixed(5);
+        if (tilesFailed) showFrame();
+        else drawTiles();
+    }
+
+    function drawTiles() {
+        const box = $('map');
+        const w = box.clientWidth, h = box.clientHeight;
+        if (!mapPos || tilesFailed || !w || !h) return;
+        const key = mapKey + '/' + w + 'x' + h;
+        if (key === tilesKey) return;
+        tilesKey = key;
+        const zoom = 16, size = 256, count = 2 ** zoom;
+        const rad = mapPos.lat * Math.PI / 180;
+        const px = (mapPos.lon + 180) / 360 * count * size;
+        const py = (1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2 * count * size;
+        const images = [];
+        for (let x = Math.floor((px - w / 2) / size); x <= Math.floor((px + w / 2) / size); x++) {
+            for (let y = Math.floor((py - h / 2) / size); y <= Math.floor((py + h / 2) / size); y++) {
+                if (y < 0 || y >= count) continue;
+                const img = el('img');
+                img.alt = '';
+                img.referrerPolicy = 'strict-origin-when-cross-origin';
+                img.style.left = Math.round(x * size - px + w / 2) + 'px';
+                img.style.top = Math.round(y * size - py + h / 2) + 'px';
+                img.onerror = useFrame;
+                img.src = 'https://tile.openstreetmap.org/' + zoom + '/' + (((x % count) + count) % count) + '/' + y + '.png';
+                images.push(img);
+            }
+        }
+        $('tiles').replaceChildren(...images);
+    }
+
+    // the tile server refused: fall back to the embed page of OpenStreetMap
+    function useFrame() {
+        if (tilesFailed) return;
+        tilesFailed = true;
+        $('tiles').replaceChildren();
+        showFrame();
+    }
+
+    function showFrame() {
+        if (!mapPos) return;
+        const d = 0.004;
+        const bbox = [mapPos.lon - d, mapPos.lat - d, mapPos.lon + d, mapPos.lat + d].map(x => x.toFixed(5)).join(',');
+        $('map').hidden = true;
+        $('mapFrame').hidden = false;
+        $('mapFrame').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + encodeURIComponent(mapKey);
     }
 
     function renderDay() {
@@ -349,5 +413,6 @@
         render();
     }
 
+    new ResizeObserver(drawTiles).observe($('map'));
     new ResizeObserver(() => document.body.classList.toggle('small', document.body.clientHeight < 240)).observe(document.body);
 </script>
