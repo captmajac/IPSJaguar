@@ -2,7 +2,7 @@
 
 // Local preview of Jaguar/module.html with made-up data.
 // Serve the repo root: ../tools/php/php -S 127.0.0.1:8766 and open /tests/tile-preview.php
-// Parameters: ?sample=0..3 &theme=light &w=380 &h=720
+// Parameters: ?sample=0..4 &theme=light &w=380 &h=720
 
 date_default_timezone_set('Europe/Berlin');
 require_once __DIR__ . '/../libs/JlrTile.php';
@@ -26,6 +26,7 @@ $samples = [
     JlrTile::payload(['FuelLevel' => 8, 'DoorFrontRight' => true, 'WindowFrontLeft' => true, 'TyreLowRearLeft' => true, 'OilLow' => true, 'Locked' => false, 'BootLocked' => false] + $values, $info, $days, $now),
     JlrTile::payload($values, ['online' => false] + $info, $days, $now),
     JlrTile::payload([], ['name' => '', 'online' => true, 'lastReport' => 0, 'position' => null], [], $now),
+    JlrTile::payload(['Locked' => false, 'BootLocked' => false, 'VehicleState' => 'KEY_ON_ENGINE_OFF'] + $values, $info, $days, $now),
 ];
 $sample = $samples[(int) ($_GET['sample'] ?? 0)] ?? $samples[0];
 $light = ($_GET['theme'] ?? '') === 'light';
@@ -35,6 +36,7 @@ $html = file_get_contents(__DIR__ . '/../Jaguar/module.html');
 $doc = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:-apple-system,sans-serif;font-size:15px;--accent-color:#00cdab;--on-accent-color:#fff;'
     . ($light ? '--content-color:#10161e;background:#fff;' : '--content-color:#e8eef5;background:#1b2531;')
     . '}</style><script>function requestAction(){setTimeout(()=>handleMessage(' . json_encode(json_encode($sample), JSON_HEX_TAG | JSON_HEX_AMP) . '),600)}</script></head><body>'
+    . '<div style="position:fixed;left:20px;top:12px;font-size:19px;color:#fff">Modulname</div><div style="position:fixed;right:20px;top:14px;width:18px;height:18px;border:1px solid #fff"></div>'
     . $html . '<script>handleMessage(' . json_encode(json_encode($sample), JSON_HEX_TAG | JSON_HEX_AMP) . ');</script></body></html>';
 ?>
 <!doctype html>

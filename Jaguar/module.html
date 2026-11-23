@@ -10,29 +10,30 @@
         --jt-card: color-mix(in srgb, var(--content-color, #7F7F7F) 7%, transparent);
         --jt-accent: var(--accent-color, #00CDAB);
         --jt-green: #43A047; --jt-orange: #FB8C00; --jt-red: #E53935;
-        font-family: inherit; color: var(--jt-text); height: 100%; box-sizing: border-box; padding: 12px;
+        font-family: inherit; color: var(--jt-text); height: 100%; box-sizing: border-box; padding: 46px 20px 12px;
         display: flex; flex-direction: column; gap: 10px; overflow: hidden;
     }
     #jt *, #jt *::before { box-sizing: border-box; }
     #jt button { font: inherit; color: inherit; cursor: pointer; }
+    /* the top padding of #jt stays free: Symcon shows the instance name and its enlarge button there */
     #jt .head { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
     #jt .title { flex: 1; min-width: 0; }
     #jt .name { font-size: 1.25em; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #jt .stand { font-size: 0.75em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #jt .pill { flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; padding: 3px 9px; border-radius: 999px; background: var(--jt-card); }
+    #jt .pill { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; padding: 6px 11px; border-radius: 999px; background: var(--jt-card); }
     #jt .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--jt-red); }
     #jt .pill.on i { background: var(--jt-green); }
-    #jt .refresh { flex: none; width: 34px; height: 34px; padding: 0; border: 1px solid var(--jt-line); border-radius: 50%; background: none; display: grid; place-items: center; }
+    #jt .refresh { flex: none; width: 36px; height: 36px; padding: 0; border: none; border-radius: 50%; background: var(--jt-card); display: grid; place-items: center; }
     #jt .refresh svg { width: 16px; height: 16px; }
     #jt .refresh.busy svg { animation: jt-spin 0.9s linear infinite; }
     @keyframes jt-spin { to { transform: rotate(360deg); } }
-    #jt .tabs { display: flex; flex: none; border-bottom: 1px solid var(--jt-line); }
-    #jt .tabs button { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 6px 4px; opacity: 0.65; }
-    #jt .tabs button.active { opacity: 1; font-weight: 600; border-bottom-color: var(--jt-accent); }
+    #jt .tabs { display: flex; flex: none; gap: 2px; padding: 3px; border-radius: 10px; background: var(--jt-card); }
+    #jt .tabs button { flex: 1; min-width: 0; background: none; border: none; border-radius: 8px; padding: 7px 4px; font-weight: 600; opacity: 0.65; }
+    #jt .tabs button.active { opacity: 1; background: var(--jt-accent); color: var(--on-accent-color, #FFFFFF); }
     #jt .page { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: none; flex-direction: column; gap: 10px; scrollbar-width: thin; }
     #jt .page.active { display: flex; }
     #jt .card { background: var(--jt-card); border-radius: 12px; padding: 12px; flex: none; }
-    #jt h3 { margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.7; }
+    #jt h3 { margin: 0 0 6px; font-size: 0.78em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.7; }
     #jt .hero { display: flex; align-items: center; gap: 14px; }
     #jt .ring { position: relative; flex: none; width: 104px; height: 104px; }
     #jt .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -50,11 +51,14 @@
     #jt .chip i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
     #jt .good { color: var(--jt-green); }
     #jt .warn { color: var(--jt-orange); }
+    #jt .chip.neutral i { opacity: 0.45; }
     #jt .chip span { color: var(--jt-text); }
     #jt .row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--jt-line); font-size: 0.9em; }
     #jt .row:first-of-type { border-top: none; }
-    #jt .row > span:first-child { opacity: 0.75; flex: none; }
-    #jt .row > span:last-child { text-align: right; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+    #jt .row > span:first-child { opacity: 0.75; flex: none; display: inline-flex; align-items: center; gap: 9px; }
+    #jt .row svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    #jt .row .good { color: inherit; }
+    #jt .row > span:last-child { text-align: right; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
     #jt .tyres { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
     #jt .tyre { border: 1px solid var(--jt-line); border-radius: 8px; padding: 6px 8px; min-width: 0; }
     #jt .tyre small { display: block; font-size: 0.72em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -79,7 +83,8 @@
     #jt .compact { display: none; flex: 1; align-items: center; gap: 12px; min-height: 0; }
     #jt .compact b { font-size: 1.6em; }
     #jt .compact div { min-width: 0; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    body.small #jt { padding: 8px 10px; gap: 4px; }
+    @media (max-width: 340px) { #jt .standLabel { display: none; } }
+    body.small #jt { padding: 40px 20px 8px; gap: 4px; }
     body.small #jt .tabs, body.small #jt .page.active, body.small #jt .pill { display: none; }
     body.small #jt .compact { display: flex; }
 </style>
@@ -88,7 +93,7 @@
     <div class="head">
         <div class="title">
             <div class="name" id="name"></div>
-            <div class="stand" id="stand"></div>
+            <div class="stand"><span class="standLabel">Fahrzeugdaten: </span><span id="stand"></span></div>
         </div>
         <span class="pill" id="pill" title="Verbindung zum JLR Data Hub"><i></i><span id="pillText"></span></span>
         <button class="refresh" id="refresh" title="Aktualisieren" aria-label="Aktualisieren" onclick="refresh()">
@@ -147,6 +152,17 @@
     let mapKey = '';
     let busyTimer = 0;
     const $ = id => document.getElementById(id);
+    const CAR = '<path d="M3 17v-4l3-1 3-5h6l4 5 2 1v4z"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>';
+    // fixed markup, never data from the API
+    const ICONS = {
+        'Türen': '<path d="M5 21V10l6-7h8v18z"/><path d="M5 11h14"/><path d="M14 15h2"/>',
+        'Fenster': '<path d="M4 4h16v16H4z"/><path d="M12 4v16"/><path d="M4 12h16"/>',
+        'Verdeck': '<path d="M3 18h18"/><path d="M5 18c0-6 4-10 9-10h3l3 10"/>',
+        'Kofferraum': CAR + '<path d="M19 12l2-4"/>',
+        'Motorhaube': CAR + '<path d="M6 12L3 8"/>',
+        'Service in': '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.9-.7-.7-2.9z"/>',
+        'Warnungen': '<path d="M12 3L2 20h20z"/><path d="M12 10v4"/><path d="M12 17h.01"/>',
+    };
 
     function el(tag, className, text) {
         const e = document.createElement(tag);
@@ -184,22 +200,31 @@
         requestAction('Refresh', '');
     }
 
-    function chip(ok, text) {
-        const c = el('span', 'chip ' + (ok ? 'good' : 'warn'));
+    function chip(cls, text) {
+        const c = el('span', 'chip ' + cls);
         c.append(el('i'), el('span', '', text));
         return c;
     }
 
+    // with the ignition on the vehicle was not parked yet: no warning for a state that is probably out of date
+    function lockChip(locked, lockedText, openText, lastText, ignitionOn) {
+        if (locked) return chip('good', lockedText);
+        return ignitionOn ? chip('neutral', lastText) : chip('warn', openText);
+    }
+
     function row(parent, label, text, cls) {
         const r = el('div', 'row');
-        r.append(el('span', '', label), el('span', cls || '', text));
+        const name = el('span');
+        name.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[label] || '') + '</svg>';
+        name.append(label);
+        r.append(name, el('span', cls || '', text));
         parent.append(r);
     }
 
     // list of open positions: [] = all closed, null = not reported
     function openRow(parent, label, open) {
         if (open === null || open === undefined) return;
-        if (open.length === 0) row(parent, label, 'Geschlossen', 'good');
+        if (open.length === 0) row(parent, label, 'Alle geschlossen', 'good');
         else row(parent, label, 'Offen: ' + open.join(', '), 'warn');
     }
 
@@ -220,8 +245,8 @@
         $('voltage').textContent = unit(s.voltage, 'V', 1);
 
         const chips = [];
-        if (s.locked !== null) chips.push(chip(s.locked, s.locked ? 'Verriegelt' : 'Entriegelt'));
-        if (s.bootLocked !== null) chips.push(chip(s.bootLocked, s.bootLocked ? 'Kofferraum verriegelt' : 'Kofferraum entriegelt'));
+        if (s.locked !== null) chips.push(lockChip(s.locked, 'Verriegelt', 'Entriegelt', 'Zuletzt entriegelt', s.ignitionOn));
+        if (s.bootLocked !== null) chips.push(lockChip(s.bootLocked, 'Kofferraum verriegelt', 'Kofferraum entriegelt', 'Kofferraum zuletzt entriegelt', s.ignitionOn));
         $('chips').replaceChildren(...chips);
 
         const v = $('vehicle');
@@ -300,15 +325,15 @@
 
     function render() {
         const s = state;
-        $('name').textContent = s.name || 'Jaguar';
-        $('stand').textContent = 'Fahrzeugdaten: ' + stamp(s.lastReport);
+        $('name').textContent = s.name;
+        $('stand').textContent = stamp(s.lastReport);
         $('pill').classList.toggle('on', s.online);
         $('pillText').textContent = s.online ? 'Online' : 'Offline';
         renderOverview(s);
         renderStats(s);
         $('smallFuel').textContent = s.fuel === null ? '–' : s.fuel + ' %';
         const parts = [unit(s.range, 'km')];
-        if (s.locked !== null) parts.push(s.locked ? 'Verriegelt' : 'Entriegelt');
+        if (s.locked !== null) parts.push(s.locked ? 'Verriegelt' : s.ignitionOn ? 'Zuletzt entriegelt' : 'Entriegelt');
         $('smallText').textContent = parts.join(' · ');
     }
 
@@ -319,5 +344,5 @@
         render();
     }
 
-    new ResizeObserver(() => document.body.classList.toggle('small', document.body.clientHeight < 160)).observe(document.body);
+    new ResizeObserver(() => document.body.classList.toggle('small', document.body.clientHeight < 240)).observe(document.body);
 </script>

@@ -81,6 +81,8 @@ class JlrTile
             'service'     => $values['ServiceDistance'] ?? null,
             'locked'      => $values['Locked'] ?? null,
             'bootLocked'  => $values['BootLocked'] ?? null,
+            // locking after this report is often not sent, so "unlocked" may be out of date
+            'ignitionOn'  => strpos((string) ($values['VehicleState'] ?? ''), 'KEY_ON') === 0,
             'doors'       => self::openOnes($values, 'Door'),
             'windows'     => self::openOnes($values, 'Window'),
             'boot'        => $values['Boot'] ?? null,

@@ -83,3 +83,10 @@ $tests['Account: passes the vehicle details on'] = function () {
     $a = makeAccount();
     check(ask($a, 'vehicle', VIN)['data']['Vehicle']['VehicleIdentification']['Model'] === 'F-Type', 'details');
 };
+
+$tests['Tile: knows when the last report came with the ignition on'] = function () {
+    $info = ['name' => '', 'online' => true, 'lastReport' => 1000, 'position' => null];
+    check(JlrTile::payload(['VehicleState' => 'KEY_ON_ENGINE_OFF'], $info, [], 2000)['ignitionOn'] === true, 'key on');
+    check(JlrTile::payload(['VehicleState' => 'KEY_OFF'], $info, [], 2000)['ignitionOn'] === false, 'key off');
+    check(JlrTile::payload([], $info, [], 2000)['ignitionOn'] === false, 'unknown');
+};
