@@ -18,7 +18,8 @@
             "Open this link, sign in with your JLR account and approve:": "Diesen Link öffnen, mit dem JLR-Konto anmelden und freigeben:",
             "Code:": "Code:",
             "The instance becomes active by itself after the approval.": "Nach der Freigabe wird die Instanz von selbst aktiv.",
-            "Could not create key and certificate, see the message log": "Schlüssel und Zertifikat konnten nicht erzeugt werden, siehe Meldungen"
+            "Could not create key and certificate, see the message log": "Schlüssel und Zertifikat konnten nicht erzeugt werden, siehe Meldungen",
+            "Link": "Link"
         }
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/DataHubClient.php';
 require_once __DIR__ . '/../libs/JlrStatus.php';
+require_once __DIR__ . '/../libs/JlrTile.php';
 
 // Status values of one Jaguar / Land Rover vehicle, read through a JaguarAccount instance (JLR Data Hub)
 class Jaguar extends IPSModule
@@ -15,6 +16,7 @@ class Jaguar extends IPSModule
     const POS_LONGITUDE = 81;
     const ACCOUNT_MODULE = '{CBB7885A-80DA-46AC-8D93-8F1651E76565}';
     const TO_PARENT = '{60CFED1E-F398-4D76-B7D3-F82F4A49F10C}';
+    const REFRESH_THROTTLE_S = 60;
 
     public function Create()
     {
@@ -30,6 +32,13 @@ class Jaguar extends IPSModule
 
         // signal => value of the last update, for "Show all values"
         $this->RegisterAttributeString('LastStatus', '{}');
+        // date => odometer in km, for the statistics of the tile
+        $this->RegisterAttributeString('Days', '{}');
+        // model as JLR name it, once per vehicle
+        $this->RegisterAttributeString('VehicleName', '');
+        $this->RegisterAttributeInteger('LastFetch', 0);
+
+        $this->SetVisualizationType(1);
 
         $this->RegisterTimer('Update', 0, 'IPS_RequestAction($_IPS[\'TARGET\'], "Update", "");');
         $this->RegisterMessage(0, IPS_KERNELSTARTED);
@@ -63,6 +72,13 @@ class Jaguar extends IPSModule
         return json_encode($form);
     }
 
+    public function GetVisualizationTile()
+    {
+        $flags = JSON_HEX_TAG | JSON_HEX_AMP;
+        $initial = json_encode(json_encode($this->tilePayload(), $flags), $flags);
+        return file_get_contents(__DIR__ . '/module.html') . "\n<script>handleMessage($initial);</script>";
+    }
+
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         // ApplyChanges before the kernel was ready did not fetch
@@ -84,8 +100,16 @@ class Jaguar extends IPSModule
             case 'Update':
                 $this->update();
                 break;
+            case 'Refresh':
+                // button of the tile
+                if ($this->now() - $this->ReadAttributeInteger('LastFetch') >= self::REFRESH_THROTTLE_S) {
+                    $this->update();
+                } else {
+                    $this->render();
+                }
+                break;
             case 'UpdateNow':
-                echo $this->update() ? $this->Translate("Status updated") : $this->Translate("Update failed, see the message log");
+                $this->message($this->update() ? $this->Translate("Status updated") : $this->Translate("Update failed, see the message log"));
                 break;
             case 'ShowValues':
                 $this->showValues();
@@ -121,7 +145,56 @@ class Jaguar extends IPSModule
         return $answer['data'] ?? [];
     }
 
+    protected function now(): int
+    {
+        return time();
+    }
+
     private function update(): bool
+    {
+        $this->WriteAttributeInteger('LastFetch', $this->now());
+        $ok = $this->fetch();
+        $this->render();
+        return $ok;
+    }
+
+    private function render(): void
+    {
+        $this->UpdateVisualizationValue(json_encode($this->tilePayload()));
+    }
+
+    private function tilePayload(): array
+    {
+        $values = JlrStatus::values(json_decode($this->ReadAttributeString('LastStatus'), true) ?: []);
+        $position = null;
+        if ($this->ReadPropertyBoolean('Position') && @$this->GetIDForIdent('Latitude') !== false) {
+            $latitude = (float) $this->GetValue('Latitude');
+            $longitude = (float) $this->GetValue('Longitude');
+            $position = $latitude === 0.0 && $longitude === 0.0 ? null : [$latitude, $longitude];
+        }
+        return JlrTile::payload($values, [
+            'name'       => $this->ReadAttributeString('VehicleName'),
+            'online'     => $this->GetStatus() === 102,
+            'lastReport' => @$this->GetIDForIdent('LastUpdate') === false ? 0 : (int) $this->GetValue('LastUpdate'),
+            'position'   => $position,
+        ], json_decode($this->ReadAttributeString('Days'), true) ?: [], $this->now());
+    }
+
+    // model for the head of the tile; without it the tile just shows no name
+    private function loadName(): void
+    {
+        if ($this->ReadAttributeString('VehicleName') !== '') {
+            return;
+        }
+        try {
+            $model = (string) ($this->api('vehicle')['Vehicle']['VehicleIdentification']['Model'] ?? '');
+            $this->WriteAttributeString('VehicleName', mb_strtoupper($model));
+        } catch (DataHubException $e) {
+            $this->SendDebug('Vehicle', $e->getMessage(), 0);
+        }
+    }
+
+    private function fetch(): bool
     {
         try {
             $snapshot = $this->api('status');
@@ -141,8 +214,15 @@ class Jaguar extends IPSModule
             }
             // an empty snapshot is stamped with the current time: the vehicle has not reported yet
             if ($flat !== []) {
-                $this->SetValue('LastUpdate', JlrStatus::lastUpdated($snapshot));
+                $reported = JlrStatus::lastUpdated($snapshot);
+                $this->SetValue('LastUpdate', $reported);
+                $odometer = JlrStatus::values($flat)['Odometer'] ?? null;
+                if ($odometer !== null && $reported > 0) {
+                    $days = json_decode($this->ReadAttributeString('Days'), true) ?: [];
+                    $this->WriteAttributeString('Days', json_encode(JlrTile::recordDay($days, $odometer, $reported)));
+                }
             }
+            $this->loadName();
 
             if ($this->ReadPropertyBoolean('Position')) {
                 try {
@@ -190,13 +270,22 @@ class Jaguar extends IPSModule
     {
         $flat = json_decode($this->ReadAttributeString('LastStatus'), true) ?: [];
         if ($flat === []) {
-            echo $this->Translate("No status loaded yet");
+            $this->message($this->Translate("No status loaded yet"));
             return;
         }
         ksort($flat);
+        $lines = [];
         foreach ($flat as $key => $value) {
-            echo "$key: $value\n";
+            $lines[] = "$key: $value";
         }
+        $this->message(implode("\n", $lines));
+    }
+
+    // popup in the configuration form; an echo from RequestAction shows up as a PHP warning with file and line
+    private function message(string $text): void
+    {
+        $this->UpdateFormField('MessageText', 'caption', $text);
+        $this->UpdateFormField('Message', 'visible', true);
     }
 
     private static function presentation(string $suffix, int $digits): array

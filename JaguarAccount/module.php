@@ -82,19 +82,19 @@ class JaguarAccount extends IPSModule
             case 'NewCertificate':
                 $this->SetTimerInterval('LinkPoll', 0);
                 if (!$this->newCredentials()) {
-                    echo $this->Translate("Could not create key and certificate, see the message log");
+                    $this->message($this->Translate("Could not create key and certificate, see the message log"));
                     return;
                 }
                 $this->SetStatus($this->ReadPropertyString('ClientId') === '' ? self::STATUS_NOT_CONFIGURED : self::STATUS_NOT_LINKED);
                 $this->UpdateFormField('Certificate', 'value', $this->ReadAttributeString('Certificate'));
-                echo $this->Translate("New certificate created. Upload it at data.jlr.com and link again.");
+                $this->message($this->Translate("New certificate created. Upload it at data.jlr.com and link again."));
                 break;
             default:
                 throw new Exception("Invalid Ident $Ident");
         }
     }
 
-    // Request of a vehicle instance: Buffer {"method": "vehicles" | "status" | "location", "vin": ...}
+    // Request of a vehicle instance: Buffer {"method": "vehicles" | "vehicle" | "status" | "location", "vin": ...}
     // Answer: {"data": ...} or {"error": message, "kind": "auth" | "forbidden" | "api"}
     public function ForwardData($JSONString)
     {
@@ -103,6 +103,7 @@ class JaguarAccount extends IPSModule
             switch ($request['method'] ?? '') {
                 case 'vehicles':
                     return json_encode(['data' => $this->tokens()['vehicles'] ?? []]);
+                case 'vehicle':
                 case 'status':
                 case 'location':
                     return json_encode(['data' => $this->read($request['method'], (string) ($request['vin'] ?? ''))]);
@@ -161,6 +162,15 @@ class JaguarAccount extends IPSModule
         return $client->$what($vin, $tokens['access_token']);
     }
 
+    // popup in the configuration form; an echo from RequestAction shows up as a PHP warning with file and line
+    private function message(string $text, string $link = ''): void
+    {
+        $this->UpdateFormField('MessageText', 'caption', $text);
+        $this->UpdateFormField('MessageLink', 'value', $link);
+        $this->UpdateFormField('MessageLink', 'visible', $link !== '');
+        $this->UpdateFormField('Message', 'visible', true);
+    }
+
     protected function generateCredentials(): array
     {
         return DataHubClient::generateCredentials();
@@ -198,22 +208,25 @@ class JaguarAccount extends IPSModule
     private function startLink(): void
     {
         if ($this->ReadPropertyString('ClientId') === '') {
-            echo $this->Translate("Please enter the client ID and apply first");
+            $this->message($this->Translate("Please enter the client ID and apply first"));
             return;
         }
         try {
             $login = $this->client()->startDeviceLogin();
         } catch (DataHubException $e) {
             $this->LogMessage($e->getMessage(), KL_ERROR);
-            echo $this->Translate("JLR refused the client. Check the client ID and that this certificate was uploaded:") . "\n" . $e->getMessage();
+            $this->message($this->Translate("JLR refused the client. Check the client ID and that this certificate was uploaded:") . "\n" . $e->getMessage());
             return;
         }
         $this->WriteAttributeString('Login', json_encode($login));
         $this->SetTimerInterval('LinkPoll', $login['interval'] * 1000);
         $this->SetStatus(self::STATUS_WAITING);
-        echo $this->Translate("Open this link, sign in with your JLR account and approve:") . "\n\n" . $login['verification_uri']
-            . "\n\n" . $this->Translate("Code:") . ' ' . $login['user_code']
-            . "\n\n" . $this->Translate("The instance becomes active by itself after the approval.");
+        $this->message(
+            $this->Translate("Open this link, sign in with your JLR account and approve:")
+            . "\n" . $this->Translate("Code:") . ' ' . $login['user_code']
+            . "\n" . $this->Translate("The instance becomes active by itself after the approval."),
+            $login['verification_uri']
+        );
     }
 
     private function pollLink(): void

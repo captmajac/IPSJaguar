@@ -31,7 +31,7 @@ $tests['Account: linking shows link and code, polls and tells the vehicles after
     $a = makeAccount(false);
     $m = makeJaguar([], $a);
     check($m->currentStatus() === 201 && TestRegistry::$calls === [], 'vehicle waits for the account');
-    $out = echoed(fn () => $a->RequestAction('Link', ''));
+    $out = popup($a, fn () => $a->RequestAction('Link', ''));
     check(str_contains($out, 'https://auth.example/device?user_code=ABCD-EFGH') && str_contains($out, 'ABCD-EFGH'), $out);
     check($a->currentStatus() === 204 && $a->timers['LinkPoll']['interval'] === 5000, 'waiting');
     $a->RequestAction('LinkPoll', '');
@@ -47,7 +47,7 @@ $tests['Account: linking shows link and code, polls and tells the vehicles after
 $tests['Account: an expired code ends the linking'] = function () {
     TestRegistry::$http = fakeHttp(['/token' => [400, '{"error":"authorization_pending"}']]);
     $a = makeAccount(false);
-    echoed(fn () => $a->RequestAction('Link', ''));
+    popup($a, fn () => $a->RequestAction('Link', ''));
     TestRegistry::$now += 601;
     $a->RequestAction('LinkPoll', '');
     check($a->currentStatus() === 202 && $a->timers['LinkPoll']['interval'] === 0, 'ended');
@@ -56,7 +56,7 @@ $tests['Account: an expired code ends the linking'] = function () {
 $tests['Account: a refused client says so'] = function () {
     TestRegistry::$http = fakeHttp(['/auth/device' => [401, '{"error":"invalid_client","error_description":"Invalid client credentials"}']]);
     $a = makeAccount(false);
-    check(str_contains(echoed(fn () => $a->RequestAction('Link', '')), 'Invalid client credentials'), 'message');
+    check(str_contains(popup($a, fn () => $a->RequestAction('Link', '')), 'Invalid client credentials'), 'message');
     check($a->currentStatus() === 202, 'status');
 };
 
@@ -93,7 +93,7 @@ $tests['Account: API and permission errors are passed on, the link stays'] = fun
 $tests['Account: new certificate ends the link'] = function () {
     $a = makeAccount();
     $old = $a->attributes['Certificate'];
-    echoed(fn () => $a->RequestAction('NewCertificate', ''));
+    popup($a, fn () => $a->RequestAction('NewCertificate', ''));
     check($a->attributes['Certificate'] !== $old && $a->attributes['Tokens'] === '{}', 'new credentials');
     check($a->currentStatus() === 202 && $a->formUpdates[0] === ['Certificate', 'value', $a->attributes['Certificate']], 'not linked, form updated');
 };
@@ -106,5 +106,5 @@ $tests['Account: without OpenSSL key generation the instance still opens and say
     $a->ApplyChanges();
     check($a->currentStatus() === 205 && count(TestRegistry::$log) === 1, 'status ' . $a->currentStatus());
     check(json_decode($a->GetConfigurationForm(), true)['actions'][1]['caption'] === '', 'no expiry date');
-    check(str_contains(echoed(fn () => $a->RequestAction('NewCertificate', '')), 'Could not create'), 'action says so');
+    check(str_contains(popup($a, fn () => $a->RequestAction('NewCertificate', '')), 'Could not create'), 'action says so');
 };

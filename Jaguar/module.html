@@ -1,0 +1,323 @@
+<style>
+    /* design colors of the tile visualization passed by the HTML-SDK: --content-color (text), --accent-color and
+       --on-accent-color (controls); fallbacks are the Symcon defaults */
+    html, body { height: 100%; margin: 0; }
+    #jt {
+        --jt-text: var(--content-color, inherit);
+        --jt-line: rgba(127, 127, 127, 0.25);
+        --jt-line: color-mix(in srgb, var(--content-color, #7F7F7F) 18%, transparent);
+        --jt-card: rgba(127, 127, 127, 0.1);
+        --jt-card: color-mix(in srgb, var(--content-color, #7F7F7F) 7%, transparent);
+        --jt-accent: var(--accent-color, #00CDAB);
+        --jt-green: #43A047; --jt-orange: #FB8C00; --jt-red: #E53935;
+        font-family: inherit; color: var(--jt-text); height: 100%; box-sizing: border-box; padding: 12px;
+        display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+    }
+    #jt *, #jt *::before { box-sizing: border-box; }
+    #jt button { font: inherit; color: inherit; cursor: pointer; }
+    #jt .head { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+    #jt .title { flex: 1; min-width: 0; }
+    #jt .name { font-size: 1.25em; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #jt .stand { font-size: 0.75em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #jt .pill { flex: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.75em; padding: 3px 9px; border-radius: 999px; background: var(--jt-card); }
+    #jt .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--jt-red); }
+    #jt .pill.on i { background: var(--jt-green); }
+    #jt .refresh { flex: none; width: 34px; height: 34px; padding: 0; border: 1px solid var(--jt-line); border-radius: 50%; background: none; display: grid; place-items: center; }
+    #jt .refresh svg { width: 16px; height: 16px; }
+    #jt .refresh.busy svg { animation: jt-spin 0.9s linear infinite; }
+    @keyframes jt-spin { to { transform: rotate(360deg); } }
+    #jt .tabs { display: flex; flex: none; border-bottom: 1px solid var(--jt-line); }
+    #jt .tabs button { flex: 1; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 6px 4px; opacity: 0.65; }
+    #jt .tabs button.active { opacity: 1; font-weight: 600; border-bottom-color: var(--jt-accent); }
+    #jt .page { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: none; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+    #jt .page.active { display: flex; }
+    #jt .card { background: var(--jt-card); border-radius: 12px; padding: 12px; flex: none; }
+    #jt h3 { margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.7; }
+    #jt .hero { display: flex; align-items: center; gap: 14px; }
+    #jt .ring { position: relative; flex: none; width: 104px; height: 104px; }
+    #jt .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    #jt .ring circle { fill: none; stroke-width: 9; }
+    #jt .ring .track { stroke: var(--jt-line); }
+    #jt .ring .bar { stroke: var(--jt-accent); stroke-linecap: round; transition: stroke-dasharray 0.4s; }
+    #jt .ring .inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #jt .ring b { font-size: 1.45em; line-height: 1.1; }
+    #jt .ring span { font-size: 0.7em; opacity: 0.7; }
+    #jt .facts { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+    #jt .fact small { display: block; font-size: 0.72em; opacity: 0.65; }
+    #jt .fact b { font-size: 1.05em; white-space: nowrap; }
+    #jt .chips { display: flex; flex-wrap: wrap; gap: 6px; flex: none; }
+    #jt .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82em; padding: 6px 11px; border-radius: 999px; background: var(--jt-card); }
+    #jt .chip i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    #jt .good { color: var(--jt-green); }
+    #jt .warn { color: var(--jt-orange); }
+    #jt .chip span { color: var(--jt-text); }
+    #jt .row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--jt-line); font-size: 0.9em; }
+    #jt .row:first-of-type { border-top: none; }
+    #jt .row > span:first-child { opacity: 0.75; flex: none; }
+    #jt .row > span:last-child { text-align: right; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+    #jt .tyres { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    #jt .tyre { border: 1px solid var(--jt-line); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+    #jt .tyre small { display: block; font-size: 0.72em; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #jt .tyre.low { border-color: var(--jt-orange); color: var(--jt-orange); }
+    #jt .map { display: block; width: 100%; height: 170px; border: 0; border-radius: 8px; background: var(--jt-line); }
+    #jt .where { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 7px; font-size: 0.78em; }
+    #jt .where span { opacity: 0.7; min-width: 0; overflow-wrap: anywhere; }
+    #jt .where a { flex: none; color: var(--jt-accent); text-decoration: none; font-weight: 600; }
+    #jt .hint { font-size: 0.85em; opacity: 0.75; }
+    #jt .big { font-size: 1.6em; font-weight: 700; }
+    #jt .big small { font-size: 0.55em; font-weight: 400; opacity: 0.7; }
+    #jt .bars { display: flex; align-items: flex-end; gap: 2px; height: 110px; margin-top: 8px; }
+    #jt .bars button { flex: 1; min-width: 0; height: 100%; padding: 0; border: none; background: none; display: flex; align-items: flex-end; }
+    #jt .bars i { display: block; width: 100%; min-height: 2px; border-radius: 2px 2px 0 0; background: var(--jt-accent); opacity: 0.55; }
+    #jt .bars .zero i { background: var(--jt-line); opacity: 1; }
+    #jt .bars .selected i { opacity: 1; outline: 1px solid var(--jt-accent); }
+    #jt .axis { display: flex; justify-content: space-between; font-size: 0.7em; opacity: 0.6; margin-top: 4px; }
+    #jt .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; flex: none; }
+    #jt .tiles .card { padding: 9px; text-align: center; }
+    #jt .tiles b { display: block; font-size: 1.15em; }
+    #jt .tiles small { font-size: 0.68em; opacity: 0.7; }
+    #jt .compact { display: none; flex: 1; align-items: center; gap: 12px; min-height: 0; }
+    #jt .compact b { font-size: 1.6em; }
+    #jt .compact div { min-width: 0; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    body.small #jt { padding: 8px 10px; gap: 4px; }
+    body.small #jt .tabs, body.small #jt .page.active, body.small #jt .pill { display: none; }
+    body.small #jt .compact { display: flex; }
+</style>
+
+<div id="jt">
+    <div class="head">
+        <div class="title">
+            <div class="name" id="name"></div>
+            <div class="stand" id="stand"></div>
+        </div>
+        <span class="pill" id="pill" title="Verbindung zum JLR Data Hub"><i></i><span id="pillText"></span></span>
+        <button class="refresh" id="refresh" title="Aktualisieren" aria-label="Aktualisieren" onclick="refresh()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+        </button>
+    </div>
+    <div class="tabs">
+        <button id="tabOverview" class="active" onclick="showTab('Overview')">Übersicht</button>
+        <button id="tabStats" onclick="showTab('Stats')">Statistik</button>
+    </div>
+    <div class="page active" id="pageOverview">
+        <div class="card hero">
+            <div class="ring">
+                <svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="44"/><circle class="bar" id="ring" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="0 100"/></svg>
+                <div class="inner"><b id="fuel"></b><span>Tank</span></div>
+            </div>
+            <div class="facts">
+                <div class="fact"><small>Reichweite</small><b id="range"></b></div>
+                <div class="fact"><small>Kilometerstand</small><b id="odometer"></b></div>
+                <div class="fact"><small>12-V-Batterie</small><b id="voltage"></b></div>
+            </div>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div class="card" id="vehicle"></div>
+        <div class="card" id="tyreCard"></div>
+        <div class="card" id="mapCard">
+            <h3>Standort</h3>
+            <iframe class="map" id="map" title="Karte" loading="lazy" referrerpolicy="no-referrer"></iframe>
+            <div class="where"><span id="where"></span><a id="mapLink" target="_blank" rel="noopener noreferrer">Karte öffnen</a></div>
+        </div>
+    </div>
+    <div class="page" id="pageStats">
+        <div class="card">
+            <h3 id="dayLabel"></h3>
+            <div class="big" id="dayKm"></div>
+            <div class="bars" id="bars"></div>
+            <div class="axis"><span id="axisFrom"></span><span>letzte 30 Tage</span><span>heute</span></div>
+        </div>
+        <div class="tiles">
+            <div class="card"><b id="total"></b><small>km Strecke</small></div>
+            <div class="card"><b id="perDay"></b><small>km je Fahrtag</small></div>
+            <div class="card"><b id="drivingDays"></b><small>Fahrtage</small></div>
+        </div>
+        <div class="hint">Aus den Änderungen des Kilometerstands berechnet. Einzelne Fahrten stellt JLR nicht bereit.</div>
+    </div>
+    <div class="compact">
+        <b id="smallFuel"></b>
+        <div id="smallText"></div>
+    </div>
+</div>
+
+<script>
+    // Texts are German on purpose, like the tile of the other modules
+    let state = null;
+    let selected = null;
+    let mapKey = '';
+    let busyTimer = 0;
+    const $ = id => document.getElementById(id);
+
+    function el(tag, className, text) {
+        const e = document.createElement(tag);
+        if (className) e.className = className;
+        if (text !== undefined) e.textContent = text;
+        return e;
+    }
+
+    const number = (v, digits = 0) => Number(v).toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const unit = (v, suffix, digits = 0) => v === null || v === undefined ? '–' : number(v, digits) + ' ' + suffix;
+    const two = n => String(n).padStart(2, '0');
+
+    function stamp(ts) {
+        if (!ts) return 'noch keine Meldung';
+        const d = new Date(ts * 1000);
+        return two(d.getDate()) + '.' + two(d.getMonth() + 1) + '. ' + two(d.getHours()) + ':' + two(d.getMinutes());
+    }
+
+    function shortDate(iso) {
+        const p = iso.split('-');
+        return p[2] + '.' + p[1] + '.';
+    }
+
+    function showTab(tab) {
+        ['Overview', 'Stats'].forEach(t => {
+            $('tab' + t).classList.toggle('active', t === tab);
+            $('page' + t).classList.toggle('active', t === tab);
+        });
+    }
+
+    function refresh() {
+        $('refresh').classList.add('busy');
+        clearTimeout(busyTimer);
+        busyTimer = setTimeout(() => $('refresh').classList.remove('busy'), 15000);
+        requestAction('Refresh', '');
+    }
+
+    function chip(ok, text) {
+        const c = el('span', 'chip ' + (ok ? 'good' : 'warn'));
+        c.append(el('i'), el('span', '', text));
+        return c;
+    }
+
+    function row(parent, label, text, cls) {
+        const r = el('div', 'row');
+        r.append(el('span', '', label), el('span', cls || '', text));
+        parent.append(r);
+    }
+
+    // list of open positions: [] = all closed, null = not reported
+    function openRow(parent, label, open) {
+        if (open === null || open === undefined) return;
+        if (open.length === 0) row(parent, label, 'Geschlossen', 'good');
+        else row(parent, label, 'Offen: ' + open.join(', '), 'warn');
+    }
+
+    function flagRow(parent, label, open) {
+        if (open === null || open === undefined) return;
+        row(parent, label, open ? 'Offen' : 'Geschlossen', open ? 'warn' : 'good');
+    }
+
+    function renderOverview(s) {
+        const fuel = s.fuel === null ? 0 : Math.max(0, Math.min(100, s.fuel));
+        $('ring').setAttribute('stroke-dasharray', fuel + ' 100');
+        $('ring').style.stroke = s.fuel !== null && s.fuel <= 10 ? 'var(--jt-red)' : s.fuel !== null && s.fuel <= 20 ? 'var(--jt-orange)' : '';
+        // a round line cap would draw a dot at 0 %
+        $('ring').style.display = fuel > 0 ? '' : 'none';
+        $('fuel').textContent = s.fuel === null ? '–' : s.fuel + ' %';
+        $('range').textContent = unit(s.range, 'km');
+        $('odometer').textContent = unit(s.odometer, 'km');
+        $('voltage').textContent = unit(s.voltage, 'V', 1);
+
+        const chips = [];
+        if (s.locked !== null) chips.push(chip(s.locked, s.locked ? 'Verriegelt' : 'Entriegelt'));
+        if (s.bootLocked !== null) chips.push(chip(s.bootLocked, s.bootLocked ? 'Kofferraum verriegelt' : 'Kofferraum entriegelt'));
+        $('chips').replaceChildren(...chips);
+
+        const v = $('vehicle');
+        v.replaceChildren(el('h3', '', 'Fahrzeug'));
+        openRow(v, 'Türen', s.doors);
+        openRow(v, 'Fenster', s.windows);
+        flagRow(v, 'Verdeck', s.convertible);
+        flagRow(v, 'Kofferraum', s.boot);
+        flagRow(v, 'Motorhaube', s.hood);
+        if (s.service !== null) row(v, 'Service in', unit(s.service, 'km'));
+        if (s.warnings.length) row(v, 'Warnungen', s.warnings.join(', '), 'warn');
+        else if (s.lastReport) row(v, 'Warnungen', 'Keine', 'good');
+        if (v.children.length === 1) v.append(el('div', 'hint', 'Noch keine Fahrzeugdaten. Das Fahrzeug meldet sich spätestens nach der nächsten Fahrt.'));
+
+        const t = $('tyreCard');
+        t.style.display = s.tyres.length ? '' : 'none';
+        t.replaceChildren(el('h3', '', 'Reifendruck'));
+        const grid = el('div', 'tyres');
+        s.tyres.forEach(w => {
+            const c = el('div', 'tyre' + (w.low ? ' low' : ''));
+            c.append(el('small', '', w.label + (w.low ? ' · niedrig' : '')), el('b', '', unit(w.bar, 'bar', 2)));
+            grid.append(c);
+        });
+        t.append(grid);
+
+        renderMap(s);
+    }
+
+    // the map is only reloaded when the position changes
+    function renderMap(s) {
+        $('mapCard').style.display = s.position ? '' : 'none';
+        if (!s.position) { mapKey = ''; $('map').removeAttribute('src'); return; }
+        const lat = Number(s.position.lat), lon = Number(s.position.lon);
+        $('where').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5) + ' · ' + stamp(s.lastReport);
+        const key = lat.toFixed(5) + ',' + lon.toFixed(5);
+        if (key === mapKey) return;
+        mapKey = key;
+        const d = 0.004;
+        const bbox = [lon - d, lat - d, lon + d, lat + d].map(x => x.toFixed(5)).join(',');
+        $('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + encodeURIComponent(key);
+        $('mapLink').href = 'https://www.openstreetmap.org/?mlat=' + lat.toFixed(5) + '&mlon=' + lon.toFixed(5) + '#map=16/' + lat.toFixed(5) + '/' + lon.toFixed(5);
+    }
+
+    function renderDay() {
+        const day = state.stats.days.find(d => d.date === selected);
+        if (!day) return;
+        $('dayLabel').textContent = 'Strecke am ' + shortDate(day.date);
+        $('dayKm').replaceChildren(document.createTextNode(number(day.km) + ' '), el('small', '', 'km'));
+        [...$('bars').children].forEach(b => b.classList.toggle('selected', b.dataset.date === selected));
+    }
+
+    function renderStats(s) {
+        const days = s.stats.days;
+        if (!days.some(d => d.date === selected)) {
+            const driven = days.filter(d => d.km > 0);
+            selected = (driven.length ? driven[driven.length - 1] : days[days.length - 1]).date;
+        }
+        const max = Math.max(1, ...days.map(d => d.km));
+        $('bars').replaceChildren(...days.map(d => {
+            const b = el('button', d.km > 0 ? '' : 'zero');
+            b.dataset.date = d.date;
+            b.title = shortDate(d.date) + ': ' + number(d.km) + ' km';
+            b.setAttribute('aria-label', b.title);
+            b.onclick = () => { selected = d.date; renderDay(); };
+            const bar = el('i');
+            bar.style.height = (d.km / max * 100) + '%';
+            b.append(bar);
+            return b;
+        }));
+        $('axisFrom').textContent = shortDate(days[0].date);
+        $('total').textContent = number(s.stats.total);
+        $('perDay').textContent = number(s.stats.perDay);
+        $('drivingDays').textContent = s.stats.drivingDays;
+        renderDay();
+    }
+
+    function render() {
+        const s = state;
+        $('name').textContent = s.name || 'Jaguar';
+        $('stand').textContent = 'Fahrzeugdaten: ' + stamp(s.lastReport);
+        $('pill').classList.toggle('on', s.online);
+        $('pillText').textContent = s.online ? 'Online' : 'Offline';
+        renderOverview(s);
+        renderStats(s);
+        $('smallFuel').textContent = s.fuel === null ? '–' : s.fuel + ' %';
+        const parts = [unit(s.range, 'km')];
+        if (s.locked !== null) parts.push(s.locked ? 'Verriegelt' : 'Entriegelt');
+        $('smallText').textContent = parts.join(' · ');
+    }
+
+    function handleMessage(data) {
+        state = typeof data === 'string' ? JSON.parse(data) : data;
+        clearTimeout(busyTimer);
+        $('refresh').classList.remove('busy');
+        render();
+    }
+
+    new ResizeObserver(() => document.body.classList.toggle('small', document.body.clientHeight < 160)).observe(document.body);
+</script>

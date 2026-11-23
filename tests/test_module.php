@@ -64,8 +64,8 @@ $tests['Vehicle: an empty snapshot sets nothing'] = function () {
 $tests['Vehicle: form lists the vehicles of the account, show values lists all signals'] = function () {
     $m = makeJaguar();
     check(array_column(json_decode($m->GetConfigurationForm(), true)['elements'][1]['options'], 'value') === ['', VIN], 'vin options');
-    check(str_contains(echoed(fn () => $m->RequestAction('ShowValues', '')), 'Body.Mirrors.Folded: YES'), 'all values');
-    check(echoed(fn () => $m->RequestAction('UpdateNow', '')) === 'Status updated', 'update now');
+    check(str_contains(popup($m, fn () => $m->RequestAction('ShowValues', '')), 'Body.Mirrors.Folded: YES'), 'all values');
+    check(popup($m, fn () => $m->RequestAction('UpdateNow', '')) === 'Status updated', 'update now');
 };
 
 const MODULES = ['JaguarAccount' => 'JAGIO', 'Jaguar' => 'JAG'];
@@ -88,7 +88,7 @@ $tests['Language: all texts are translated, none unused'] = function () {
 };
 
 $tests['Convention: module files, public functions, data flow, libs without Symcon'] = function () {
-    $allowed = ['Create', 'ApplyChanges', 'MessageSink', 'RequestAction', 'GetConfigurationForm', 'ForwardData', 'ReceiveData'];
+    $allowed = ['Create', 'ApplyChanges', 'MessageSink', 'RequestAction', 'GetConfigurationForm', 'GetVisualizationTile', 'ForwardData', 'ReceiveData'];
     $json = [];
     foreach (MODULES as $module => $prefix) {
         $json[$module] = json_decode(file_get_contents(__DIR__ . "/../$module/module.json"), true);

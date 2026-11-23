@@ -35,6 +35,20 @@
             "type": "Button",
             "caption": "Show all values of the vehicle",
             "onClick": "IPS_RequestAction($id, 'ShowValues', '');"
+        },
+        {
+            "type": "PopupAlert",
+            "name": "Message",
+            "visible": false,
+            "popup": {
+                "items": [
+                    {
+                        "type": "Label",
+                        "name": "MessageText",
+                        "caption": ""
+                    }
+                ]
+            }
         }
     ],
     "status": [

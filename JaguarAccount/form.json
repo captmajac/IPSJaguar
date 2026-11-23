@@ -35,6 +35,28 @@
             "caption": "Create new certificate",
             "confirm": "This ends the existing link. Continue?",
             "onClick": "IPS_RequestAction($id, 'NewCertificate', '');"
+        },
+        {
+            "type": "PopupAlert",
+            "name": "Message",
+            "visible": false,
+            "popup": {
+                "items": [
+                    {
+                        "type": "Label",
+                        "name": "MessageText",
+                        "caption": ""
+                    },
+                    {
+                        "type": "ValidationTextBox",
+                        "name": "MessageLink",
+                        "caption": "Link",
+                        "width": "600px",
+                        "value": "",
+                        "visible": false
+                    }
+                ]
+            }
         }
     ],
     "status": [

@@ -125,9 +125,14 @@ function makeAccount(bool $linked = true, array $props = []): TestAccount
 }
 
 // vehicle instance on an account (a linked one unless given; null = no account)
-function makeJaguar(array $props = [], $account = false, int $id = 2): Jaguar
+class TestJaguar extends Jaguar
 {
-    $m = new Jaguar($id);
+    protected function now(): int { return TestRegistry::$now; }
+}
+
+function makeJaguar(array $props = [], $account = false, int $id = 2): TestJaguar
+{
+    $m = new TestJaguar($id);
     $m->Create();
     $m->testParent = $account === false ? makeAccount() : $account;
     if ($m->testParent !== null) {
@@ -139,9 +144,27 @@ function makeJaguar(array $props = [], $account = false, int $id = 2): Jaguar
 }
 
 
-function echoed(callable $action): string
+// text of the popup an action opened; an echo would show up in Symcon as a PHP warning with file and line
+function popup(IPSModule $m, callable $action): string
 {
+    $m->formUpdates = [];
     ob_start();
     $action();
-    return (string) ob_get_clean();
+    $echo = (string) ob_get_clean();
+    check($echo === '', 'echoed: ' . $echo);
+    $caption = '';
+    $visible = false;
+    foreach ($m->formUpdates as [$field, $parameter, $value]) {
+        if ($field === 'MessageText' && $parameter === 'caption') {
+            $caption = $value;
+        }
+        if ($field === 'Message' && $parameter === 'visible') {
+            $visible = $value;
+        }
+        if ($field === 'MessageLink' && $parameter === 'value') {
+            $caption .= "\n" . $value;
+        }
+    }
+    check($visible === true, 'no popup');
+    return $caption;
 }

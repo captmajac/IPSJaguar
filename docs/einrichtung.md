@@ -82,6 +82,10 @@ Gemessen am F-Type:
 - Auch ein Zweitürer meldet hintere Türen und Fenster (immer `CLOSED`). Die Variablen dafür entstehen, sagen aber nichts; sie lassen sich in Symcon ausblenden. Gelöschte Variablen legt das Modul bei der nächsten Abfrage wieder an.
 - Die Position kam ohne eigenen Zeitstempel, mit dem Zeitstempel des Status.
 
+### 7. Kachel anzeigen
+
+Die Instanz „Jaguar" in der Visualisierung (Kachel-Visualisierung) einfügen. Die Kachel zeigt die Tabs **Übersicht** und **Statistik**; die Statistik füllt sich ab jetzt mit jeder neuen Meldung des Fahrzeugs. Die Karte kommt von OpenStreetMap und bekommt dafür die Fahrzeugposition vom anzeigenden Browser. Ohne **Position lesen** entfällt sie.
+
 ## Stolpersteine
 
 | Symptom | Ursache | Lösung |
@@ -95,7 +99,8 @@ Gemessen am F-Type:
 
 ## Gut zu wissen
 
-- **Ein Zertifikat pro Client.** Das Probe-Skript und eine Konto-Instanz haben je ein eigenes Schlüsselpaar. Entweder einen zweiten Client anlegen oder das Zertifikat des Clients ersetzen und neu koppeln.
+- **Nur ein Device pro JLR-Konto.** Auf data.jlr.com lässt sich nur ein Device anlegen. Mehrere Fahrzeuge laufen deshalb über denselben Client und dieselbe Konto-Instanz.
+- **Ein Zertifikat pro Client.** Das Probe-Skript und eine Konto-Instanz haben je ein eigenes Schlüsselpaar. Wer vom Skript zu Symcon wechselt, ersetzt beim Client das Zertifikat und koppelt neu; die Client-ID bleibt. Das Skript wird danach abgewiesen (`Invalid client credentials`).
 - **Gültigkeit:** Das Zertifikat gilt ein Jahr. Danach in der Konto-Instanz „Neues Zertifikat erzeugen", beim Client hochladen und neu koppeln.
 - **Token:** Der Zugriffstoken gilt nur 5 Minuten (die JLR-Doku nennt 1 Stunde). Das Modul erneuert ihn bei jeder Abfrage; der Erneuerungstoken wechselt dabei jedes Mal und wird sofort gespeichert.
 - **Technik:** Token-Anfragen sind mit dem privaten Schlüssel signiert (`private_key_jwt`, PS256), jede Datenabfrage trägt einen DPoP-Nachweis mit demselben Schlüssel. PHP kann PS256 nicht von Haus aus; `libs/DataHubClient.php` rechnet die PSS-Signatur selbst.

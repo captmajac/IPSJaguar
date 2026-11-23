@@ -39,7 +39,7 @@ Variablen entstehen nur für Werte, die das Fahrzeug tatsächlich liefert. „Al
 ../tools/php/php tests/probe.php
 ```
 
-Führt dieselbe Kopplung auf der Kommandozeile durch, speichert Schlüssel, Token und Rohantworten in `tests/fixtures/raw/` (nicht in git) und zeigt, welche Variablen das Modul setzen würde. Das Skript hat ein eigenes Zertifikat; für Symcon danach einen zweiten Client anlegen oder das Zertifikat des Clients durch das der Konto-Instanz ersetzen.
+Führt dieselbe Kopplung auf der Kommandozeile durch, speichert Schlüssel, Token und Rohantworten in `tests/fixtures/raw/` (nicht in git) und zeigt, welche Variablen das Modul setzen würde. Das Skript hat ein eigenes Zertifikat. Da JLR nur ein Device pro Konto erlaubt, ersetzt man für Symcon danach das Zertifikat des Clients durch das der Konto-Instanz und koppelt neu; das Skript wird dann abgewiesen.
 
 ## Tests
 
