@@ -42,6 +42,7 @@ class Jaguar extends IPSModule
         // journeys without positions, see JlrTile::journeys; state: unknown, ok or refused
         $this->RegisterAttributeString('Journeys', '[]');
         $this->RegisterAttributeString('JourneyState', 'unknown');
+        $this->RegisterAttributeString('JourneyError', '');
         $this->RegisterAttributeInteger('JourneyFetch', 0);
         $this->RegisterAttributeInteger('JourneyReport', 0);
 
@@ -186,6 +187,7 @@ class Jaguar extends IPSModule
             'position'   => $position,
             'journeys'   => json_decode($this->ReadAttributeString('Journeys'), true) ?: [],
             'journeyState' => $this->ReadAttributeString('JourneyState'),
+            'journeyError' => $this->ReadAttributeString('JourneyError'),
         ], json_decode($this->ReadAttributeString('Days'), true) ?: [], $this->now());
     }
 
@@ -274,10 +276,13 @@ class Jaguar extends IPSModule
         try {
             $this->WriteAttributeString('Journeys', json_encode(JlrTile::journeys($this->api('journeys'))));
             $this->WriteAttributeString('JourneyState', 'ok');
+            $this->WriteAttributeString('JourneyError', '');
         } catch (DataHubForbiddenException $e) {
             $this->WriteAttributeString('JourneyState', 'refused');
+            $this->WriteAttributeString('JourneyError', '');
             $this->SendDebug('Journeys', $e->getMessage(), 0);
         } catch (DataHubException $e) {
+            $this->WriteAttributeString('JourneyError', JlrTile::journeyError($e->getMessage()));
             $this->SendDebug('Journeys', $e->getMessage(), 0);
         }
     }

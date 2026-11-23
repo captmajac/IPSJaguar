@@ -190,3 +190,21 @@ $tests['Vehicle: a failed journey read keeps the last journeys'] = function () {
     $p = json_decode(end($m->visu), true);
     check($p['online'] === true && count($p['journeys']) === 1 && $p['journeyState'] === 'ok', 'kept');
 };
+
+$tests['Vehicle: the tile names a failed journey read and clears it after a good one'] = function () {
+    TestRegistry::$http = fakeHttp(['/journeys' => [404, '']]);
+    $m = makeJaguar();
+    $p = json_decode(end($m->visu), true);
+    check($p['online'] === true && $p['journeyError'] === 'Abfrage fehlgeschlagen (HTTP 404)', json_encode($p['journeyError']));
+    TestRegistry::$http = fakeHttp(['/journeys' => [200, '{"items":[]}']]);
+    TestRegistry::$now += 3700;
+    $m->RequestAction('Update', '');
+    $p = json_decode(end($m->visu), true);
+    check($p['journeyError'] === '' && $p['journeys'] === [] && $p['journeyState'] === 'ok', 'an empty list is no error');
+};
+
+$tests['Vehicle: refused journeys are no read error'] = function () {
+    TestRegistry::$http = fakeHttp(['/journeys' => [403, '{"detail":"not permitted"}']]);
+    $m = makeJaguar();
+    check(json_decode(end($m->visu), true)['journeyError'] === '', 'refused has its own hint');
+};

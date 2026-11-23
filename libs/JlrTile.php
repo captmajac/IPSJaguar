@@ -96,6 +96,7 @@ class JlrTile
             'stats'       => self::statistics($days, $now),
             'journeys'    => $info['journeys'] ?? [],
             'journeyState' => $info['journeyState'] ?? 'unknown',
+            'journeyError' => $info['journeyError'] ?? '',
         ];
     }
 
@@ -119,6 +120,12 @@ class JlrTile
         }
         krsort($out);
         return array_slice(array_values($out), 0, self::MAX_JOURNEYS);
+    }
+
+    // short text for the tile, without details of the request
+    public static function journeyError(string $message): string
+    {
+        return preg_match('/HTTP \d+/', $message, $code) ? 'Abfrage fehlgeschlagen (' . $code[0] . ')' : 'Abfrage fehlgeschlagen';
     }
 
     // value in the wanted unit, null without a value or with an unknown unit

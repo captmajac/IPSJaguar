@@ -379,13 +379,14 @@
 
     function renderJourneys(s) {
         const box = $('pageJourneys');
+        const nodes = [];
+        if (s.journeyError) nodes.push(el('div', 'card hint warn', 'Fahrten: ' + s.journeyError));
         if (!s.journeys.length) {
-            box.replaceChildren(el('div', 'card hint', s.journeyState === 'refused'
-                ? 'JLR gibt für dieses Fahrzeug derzeit keine Fahrten frei. Das Modul fragt einmal täglich erneut.'
-                : 'Noch keine Fahrten vorhanden. Neue Fahrten erscheinen einige Minuten nach dem Abstellen.'));
+            if (s.journeyState === 'refused') nodes.push(el('div', 'card hint', 'JLR gibt für dieses Fahrzeug derzeit keine Fahrten frei. Das Modul fragt einmal täglich erneut.'));
+            else if (!s.journeyError) nodes.push(el('div', 'card hint', 'Noch keine Fahrten vorhanden. Prüfe, ob die Fahrtenerfassung in der JLR-App aktiviert ist.'));
+            box.replaceChildren(...nodes);
             return;
         }
-        const nodes = [];
         let day = '';
         s.journeys.forEach(j => {
             const label = new Date(j.start * 1000).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });

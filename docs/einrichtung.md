@@ -95,6 +95,7 @@ Die Instanz „Jaguar" in der Visualisierung (Kachel-Visualisierung) einfügen. 
 | `403` mit „Access to category is not permitted for this vehicle" nur bei der Position | Fahrzeug nicht deklariert. | Schritt 5. |
 | Status leer, Zeitstempel ist die aktuelle Uhrzeit | Fahrzeug hat sich seit der Freigabe noch nicht gemeldet. | Einmal fahren (Schritt 6). |
 | Kopplung wird abgelehnt (`invalid_client`) | Client-ID falsch, oder beim Client ist ein anderes Zertifikat hinterlegt. | Client-ID prüfen, Zertifikat der Instanz neu einfügen. |
+| Fahrtenbuch bleibt leer, die Abfrage läuft aber ohne Fehler | In der JLR-App steht „Fahrtenerfassung deaktiviert“. | Fahrtenerfassung in der App einschalten. Danach sollten neue Fahrten erscheinen; frühere wurden vermutlich nicht erfasst. |
 | Ein verkauftes Fahrzeug steht noch in der Liste | Es hängt noch am JLR-Konto. | In der Remote-App bzw. im InControl-Konto entfernen, sonst über Händler oder JLR-Kundendienst. Für das Modul unschädlich: der Client gilt nur für die ausgewählten Fahrzeuge. |
 
 ## Gut zu wissen
