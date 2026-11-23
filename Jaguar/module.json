@@ -1,0 +1,13 @@
+{
+    "id": "{A46AD3A2-AB4C-4BF6-A68E-2F826D3E4B47}",
+    "name": "Jaguar",
+    "type": 3,
+    "vendor": "IPSJaguar",
+    "aliases": [
+        "Jaguar"
+    ],
+    "parentRequirements": ["{60CFED1E-F398-4D76-B7D3-F82F4A49F10C}"],
+    "childRequirements": [],
+    "implemented": ["{17C78EC2-6CE0-4230-8E87-EEC2DB660FA7}"],
+    "prefix": "JAG"
+}

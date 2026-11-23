@@ -1,0 +1,52 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "The data comes through the account instance (gateway). Link it with JLR first."
+        },
+        {
+            "type": "Select",
+            "name": "Vin",
+            "caption": "Vehicle (VIN)",
+            "width": "400px",
+            "options": []
+        },
+        {
+            "type": "CheckBox",
+            "name": "Position",
+            "caption": "Read the position (the vehicle must be declared at data.jlr.com)"
+        },
+        {
+            "type": "NumberSpinner",
+            "name": "IntervalMinutes",
+            "caption": "Update interval",
+            "suffix": "min",
+            "minimum": 5,
+            "maximum": 1440
+        }
+    ],
+    "actions": [
+        {
+            "type": "Button",
+            "caption": "Update now",
+            "onClick": "IPS_RequestAction($id, 'UpdateNow', '');"
+        },
+        {
+            "type": "Button",
+            "caption": "Show all values of the vehicle",
+            "onClick": "IPS_RequestAction($id, 'ShowValues', '');"
+        }
+    ],
+    "status": [
+        {
+            "code": 201,
+            "icon": "inactive",
+            "caption": "The account instance is not linked with JLR"
+        },
+        {
+            "code": 203,
+            "icon": "error",
+            "caption": "JLR Data Hub not reachable or answered with an error"
+        }
+    ]
+}

@@ -1,0 +1,62 @@
+{
+    "elements": [
+        {
+            "type": "Label",
+            "caption": "JLR Data Hub: the official access for owners. Steps: 1. Copy the certificate below. 2. At data.jlr.com create a client (\"Connect a device or headless system\", your vehicles, all data categories) and paste the certificate as public key. 3. Enter the client ID here and apply. 4. Press \"Link with JLR\"."
+        },
+        {
+            "type": "ValidationTextBox",
+            "name": "ClientId",
+            "caption": "Client ID (dsas-...)",
+            "width": "400px"
+        }
+    ],
+    "actions": [
+        {
+            "type": "ValidationTextBox",
+            "name": "Certificate",
+            "caption": "Certificate for data.jlr.com (copy completely)",
+            "multiline": true,
+            "width": "650px",
+            "value": ""
+        },
+        {
+            "type": "Label",
+            "name": "Info",
+            "caption": ""
+        },
+        {
+            "type": "Button",
+            "caption": "Link with JLR",
+            "onClick": "IPS_RequestAction($id, 'Link', '');"
+        },
+        {
+            "type": "Button",
+            "caption": "Create new certificate",
+            "confirm": "This ends the existing link. Continue?",
+            "onClick": "IPS_RequestAction($id, 'NewCertificate', '');"
+        }
+    ],
+    "status": [
+        {
+            "code": 201,
+            "icon": "inactive",
+            "caption": "Please enter the client ID from data.jlr.com"
+        },
+        {
+            "code": 202,
+            "icon": "error",
+            "caption": "Not linked: press \"Link with JLR\""
+        },
+        {
+            "code": 204,
+            "icon": "inactive",
+            "caption": "Waiting for your approval at JLR"
+        },
+        {
+            "code": 205,
+            "icon": "error",
+            "caption": "Could not create key and certificate, see the message log"
+        }
+    ]
+}

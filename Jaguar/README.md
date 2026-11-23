@@ -1,0 +1,49 @@
+# Jaguar
+
+Statuswerte eines Jaguar oder Land Rover aus dem **JLR Data Hub**. Das Modul liest nur; Befehle wie Verriegeln bietet die Schnittstelle nicht.
+
+### Inhaltsverzeichnis
+
+1. [Funktionsumfang](#1-funktionsumfang)
+2. [Voraussetzungen](#2-voraussetzungen)
+3. [Software-Installation](#3-software-installation)
+4. [Einrichten der Instanzen in IP-Symcon](#4-einrichten-der-instanzen-in-ip-symcon)
+5. [Statusvariablen und Visualisierung](#5-statusvariablen-und-visualisierung)
+6. [PHP-Befehlsreferenz](#6-php-befehlsreferenz)
+
+### 1. Funktionsumfang
+
+- Kilometerstand, Tank, Reichweite, Service-Strecke
+- Verriegelung, Kofferraum, Türen, Fenster, Haube, Verdeck, Alarm
+- Reifendruck und Reifendruckwarnung je Rad
+- 12-V-Spannung, Warnungen für Wischwasser, Bremsflüssigkeit, Kühlmittel und Öl
+- Position
+
+### 2. Voraussetzungen
+
+- IP-Symcon ab 9.0
+- Eine gekoppelte Instanz [Jaguar Account](../JaguarAccount/README.md)
+
+### 3. Software-Installation
+
+Über den Module Store oder in der Konsole unter *Module Control* die URL `https://github.com/captmajac/IPSJaguar` hinzufügen.
+
+### 4. Einrichten der Instanzen in IP-Symcon
+
+Unter *Instanz hinzufügen* die Instanz *Jaguar* auswählen. Pro Fahrzeug eine Instanz; alle nutzen dieselbe Konto-Instanz.
+
+| Einstellung | Bedeutung |
+|---|---|
+| Fahrzeug (FIN) | Ohne Auswahl das erste Fahrzeug des Clients |
+| Position lesen | Das Fahrzeug muss dafür auf data.jlr.com deklariert sein |
+| Aktualisierungsintervall | 5 bis 1440 Minuten, Standard 15 |
+
+### 5. Statusvariablen und Visualisierung
+
+Variablen entstehen nur für Werte, die das Fahrzeug liefert. Name, Position und Darstellung gehören danach dir; das Modul ändert sie nicht mehr. **Alle Werte des Fahrzeugs anzeigen** listet auch Werte ohne eigene Variable.
+
+Geliefert wird der zuletzt gemeldete Stand, das Fahrzeug wird nicht geweckt. Wie alt er ist, zeigt **Letzte Meldung des Fahrzeugs**. Direkt nach der Kopplung bleibt alles leer, bis sich das Fahrzeug einmal gemeldet hat, in der Regel bei der nächsten Fahrt.
+
+### 6. PHP-Befehlsreferenz
+
+Keine öffentlichen Funktionen. Aktualisieren über `IPS_RequestAction($InstanzID, 'Update', '');`.

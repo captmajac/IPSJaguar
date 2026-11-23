@@ -1,0 +1,24 @@
+{
+    "translations": {
+        "de": {
+            "JLR Data Hub: the official access for owners. Steps: 1. Copy the certificate below. 2. At data.jlr.com create a client (\"Connect a device or headless system\", your vehicles, all data categories) and paste the certificate as public key. 3. Enter the client ID here and apply. 4. Press \"Link with JLR\".": "JLR Data Hub: der offizielle Zugang für Besitzer. Schritte: 1. Zertifikat unten kopieren. 2. Auf data.jlr.com einen Client anlegen („Connect a device or headless system“, deine Fahrzeuge, alle Datenkategorien) und das Zertifikat als Public Key einfügen. 3. Client-ID hier eintragen und übernehmen. 4. „Mit JLR koppeln“ drücken.",
+            "Client ID (dsas-...)": "Client-ID (dsas-...)",
+            "Certificate for data.jlr.com (copy completely)": "Zertifikat für data.jlr.com (vollständig kopieren)",
+            "Link with JLR": "Mit JLR koppeln",
+            "Create new certificate": "Neues Zertifikat erzeugen",
+            "This ends the existing link. Continue?": "Das beendet die bestehende Kopplung. Fortfahren?",
+            "Please enter the client ID from data.jlr.com": "Bitte die Client-ID von data.jlr.com eintragen",
+            "Not linked: press \"Link with JLR\"": "Nicht gekoppelt: „Mit JLR koppeln“ drücken",
+            "Waiting for your approval at JLR": "Warte auf deine Freigabe bei JLR",
+            "Certificate valid until %s": "Zertifikat gültig bis %s",
+            "Linked vehicles: %s": "Gekoppelte Fahrzeuge: %s",
+            "New certificate created. Upload it at data.jlr.com and link again.": "Neues Zertifikat erzeugt. Auf data.jlr.com hochladen und neu koppeln.",
+            "Please enter the client ID and apply first": "Bitte zuerst die Client-ID eintragen und übernehmen",
+            "JLR refused the client. Check the client ID and that this certificate was uploaded:": "JLR hat den Client abgelehnt. Client-ID prüfen und ob dieses Zertifikat hochgeladen wurde:",
+            "Open this link, sign in with your JLR account and approve:": "Diesen Link öffnen, mit dem JLR-Konto anmelden und freigeben:",
+            "Code:": "Code:",
+            "The instance becomes active by itself after the approval.": "Nach der Freigabe wird die Instanz von selbst aktiv.",
+            "Could not create key and certificate, see the message log": "Schlüssel und Zertifikat konnten nicht erzeugt werden, siehe Meldungen"
+        }
+    }
+}

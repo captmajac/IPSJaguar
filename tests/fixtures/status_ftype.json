@@ -1,0 +1,179 @@
+{
+    "Vehicle": {
+        "Body": {
+            "Convertible": {
+                "IsOpen": "FALSE"
+            },
+            "Door": {
+                "Lock": {
+                    "Status": "TRUE"
+                }
+            },
+            "Hood": {
+                "IsLocked": "LOCKED",
+                "IsOpen": "CLOSED"
+            },
+            "Lights": {
+                "Beam": {
+                    "Low": {
+                        "IsOn": "UNKNOWN"
+                    }
+                }
+            },
+            "Roof": {
+                "IsOpen": "FALSE"
+            },
+            "Security": {
+                "Alarm": {
+                    "Mode": "ALARM_OFF"
+                },
+                "IsEngineBlocked": "NORMAL_UNBLOCKED",
+                "IsPanicAlarmTriggered": "UNKNOWN"
+            },
+            "Trunk": {
+                "Rear": {
+                    "IsLocked": "TRUE",
+                    "IsOpen": "CLOSED"
+                }
+            },
+            "Windshield": {
+                "Front": {
+                    "WasherFluid": {
+                        "IsLevelLow": "NORMAL"
+                    }
+                }
+            }
+        },
+        "Cabin": {
+            "Door": {
+                "Row1": {
+                    "DriverSide": {
+                        "IsLocked": "LOCKED",
+                        "IsOpen": "CLOSED",
+                        "Window": {
+                            "Position": "CLOSED"
+                        }
+                    },
+                    "PassengerSide": {
+                        "IsLocked": "LOCKED",
+                        "IsOpen": "CLOSED",
+                        "Window": {
+                            "Position": "CLOSED"
+                        }
+                    }
+                },
+                "Row2": {
+                    "DriverSide": {
+                        "IsLocked": "LOCKED",
+                        "IsOpen": "CLOSED",
+                        "Window": {
+                            "Position": "CLOSED"
+                        }
+                    },
+                    "PassengerSide": {
+                        "IsLocked": "LOCKED",
+                        "IsOpen": "CLOSED",
+                        "Window": {
+                            "Position": "CLOSED"
+                        }
+                    }
+                }
+            },
+            "HVAC": {
+                "AirConditioning": {
+                    "FuelFiredHeater": {
+                        "TimeRemaining": "0"
+                    },
+                    "Status": "OFF",
+                    "TimeRemaining": "30",
+                    "VentingTime": "9"
+                },
+                "Schedule": {
+                    "IsActive": "FALSE",
+                    "Primary": {
+                        "Day": "0",
+                        "Hour": "0",
+                        "Minute": "0",
+                        "Month": "0"
+                    },
+                    "Secondary": {
+                        "Day": "0",
+                        "Hour": "0",
+                        "Minute": "0",
+                        "Month": "0"
+                    }
+                }
+            }
+        },
+        "Chassis": {
+            "Axle": {
+                "Row1": {
+                    "Wheel": {
+                        "Left": {
+                            "Tire": {
+                                "IsPressureLow": "NORMAL",
+                                "Pressure": "215"
+                            }
+                        },
+                        "Right": {
+                            "Tire": {
+                                "IsPressureLow": "NORMAL",
+                                "Pressure": "215"
+                            }
+                        }
+                    }
+                },
+                "Row2": {
+                    "Wheel": {
+                        "Left": {
+                            "Tire": {
+                                "IsPressureLow": "NORMAL",
+                                "Pressure": "213"
+                            }
+                        },
+                        "Right": {
+                            "Tire": {
+                                "IsPressureLow": "WARNING_LOW_SOFT",
+                                "Pressure": "209"
+                            }
+                        }
+                    }
+                }
+            },
+            "Brake": {
+                "FluidLevel": {
+                    "IsLevelLow": "NORMAL"
+                }
+            }
+        },
+        "LowVoltageBattery": {
+            "CurrentVoltage": "12.7",
+            "IsBatteryLow": "BATTERY_1_1"
+        },
+        "Powertrain": {
+            "CombustionEngine": {
+                "EngineCoolant": {
+                    "IsLevelLow": "NORMAL",
+                    "Temperature": "89"
+                },
+                "EngineOil": {
+                    "IsLevelLow": "NORMAL"
+                }
+            },
+            "FuelSystem": {
+                "Range": "300",
+                "RelativeLevel": "50"
+            }
+        },
+        "Service": {
+            "DistanceToService": "10000"
+        },
+        "System": {
+            "DriveCycle": {
+                "Status": "KEY_ON_ENGINE_OFF"
+            }
+        },
+        "TraveledDistance": "50000000"
+    },
+    "timestamp": "2026-01-01T12:00:00.000Z"
+}

@@ -1,0 +1,13 @@
+{
+    "id": "{CBB7885A-80DA-46AC-8D93-8F1651E76565}",
+    "name": "JaguarAccount",
+    "type": 1,
+    "vendor": "IPSJaguar",
+    "aliases": [
+        "Jaguar Account"
+    ],
+    "parentRequirements": [],
+    "childRequirements": ["{17C78EC2-6CE0-4230-8E87-EEC2DB660FA7}"],
+    "implemented": ["{60CFED1E-F398-4D76-B7D3-F82F4A49F10C}"],
+    "prefix": "JAGIO"
+}
