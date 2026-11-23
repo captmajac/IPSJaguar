@@ -2,7 +2,7 @@
 
 // Local preview of Jaguar/module.html with made-up data.
 // Serve the repo root: ../tools/php/php -S 127.0.0.1:8766 and open /tests/tile-preview.php
-// Parameters: ?sample=0..6 &theme=light &w=380 &h=720
+// Parameters: ?sample=0..7 &theme=light &w=380 &h=720
 
 date_default_timezone_set('Europe/Berlin');
 require_once __DIR__ . '/../libs/JlrTile.php';
@@ -34,6 +34,7 @@ $samples = [
     JlrTile::payload(['Locked' => false, 'BootLocked' => false, 'VehicleState' => 'KEY_ON_ENGINE_OFF'] + $values, $info, $days, $now),
     JlrTile::payload(['FuelLevel' => 20, 'FuelRange' => 95] + $values, $info, $days, $now),
     JlrTile::payload($values, ['journeys' => [], 'journeyError' => 'Abfrage fehlgeschlagen (HTTP 404)'] + $info, $days, $now),
+    JlrTile::payload($values, ['lastReport' => $now - 5 * 86400] + $info, $days, $now),
 ];
 $sample = $samples[(int) ($_GET['sample'] ?? 0)] ?? $samples[0];
 $light = ($_GET['theme'] ?? '') === 'light';

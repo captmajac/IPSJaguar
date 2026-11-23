@@ -9,6 +9,8 @@ class JlrTile
     const HISTORY_DAYS = 32;
     const CHART_DAYS = 30;
     const MAX_JOURNEYS = 30;
+    // JLR send no sleep signal: the tile infers it from the age of the last report
+    const RESTING_AFTER_DAYS = 4;
 
     const SIDES = ['FrontLeft' => 'vorne links', 'FrontRight' => 'vorne rechts', 'RearLeft' => 'hinten links', 'RearRight' => 'hinten rechts'];
     const WARNINGS = [
@@ -75,6 +77,7 @@ class JlrTile
             'name'        => $info['name'],
             'online'      => $info['online'],
             'lastReport'  => $info['lastReport'],
+            'restingDays' => self::restingDays((int) $info['lastReport'], $now),
             'fuel'        => $values['FuelLevel'] ?? null,
             'range'       => $values['FuelRange'] ?? null,
             'fuelState'   => self::fuelState($values['FuelLevel'] ?? null, $values['FuelRange'] ?? null),
@@ -120,6 +123,16 @@ class JlrTile
         }
         krsort($out);
         return array_slice(array_values($out), 0, self::MAX_JOURNEYS);
+    }
+
+    // whole days without a report once the vehicle counts as resting, else null
+    private static function restingDays(int $lastReport, int $now): ?int
+    {
+        if ($lastReport <= 0) {
+            return null;
+        }
+        $days = (int) floor(($now - $lastReport) / 86400);
+        return $days >= self::RESTING_AFTER_DAYS ? $days : null;
     }
 
     // short text for the tile, without details of the request

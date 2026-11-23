@@ -48,6 +48,7 @@ Geliefert wird der zuletzt gemeldete Stand, das Fahrzeug wird nicht geweckt. Wie
 Die Instanz bringt eine eigene **Kachel** mit:
 
 - **Übersicht:** Tank, Reichweite, Kilometerstand, 12-V-Spannung, Verriegelung, Türen, Fenster, Reifendruck, Warnungen und Standort. Die Kachel zeigt nur an, denn die Schnittstelle kann das Fahrzeug nicht steuern.
+- **Ruhemodus:** JLR meldet keinen Schlafzustand. Die Kachel zeigt „Ruhemodus“, wenn das Fahrzeug sich seit mindestens 4 Tagen nicht gemeldet hat. Das ist eine Ableitung; dieselbe Anzeige entsteht auch, wenn das Fahrzeug so lange keinen Empfang hat.
 - **Fahrtenbuch:** Die letzten 30 Fahrten mit Zeit, Strecke, Dauer und Durchschnittsgeschwindigkeit, soweit JLR sie für das Fahrzeug liefert. Start- und Zielort speichert das Modul bewusst nicht. Lehnt JLR die Abfrage ab, zeigt der Tab einen Hinweis und das Modul fragt einmal täglich erneut.
 - **Statistik:** Kilometer je Tag der letzten 30 Tage. Sie wird aus den Änderungen des Kilometerstands berechnet und beginnt mit der Installation. Wird über mehrere Tage nichts gemeldet, zählt die Strecke auf den Tag der nächsten Meldung.
 - **Karte:** Sie kommt von OpenStreetMap. Der Browser, der die Kachel anzeigt, überträgt dafür die Fahrzeugposition an OpenStreetMap. Wer das nicht möchte, schaltet **Position lesen** aus.

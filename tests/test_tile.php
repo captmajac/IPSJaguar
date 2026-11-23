@@ -208,3 +208,12 @@ $tests['Vehicle: refused journeys are no read error'] = function () {
     $m = makeJaguar();
     check(json_decode(end($m->visu), true)['journeyError'] === '', 'refused has its own hint');
 };
+
+$tests['Tile: counts as resting from four days without a report'] = function () {
+    $now = 1000000;
+    $days = fn(int $report) => JlrTile::payload([], ['name' => '', 'online' => true, 'lastReport' => $report, 'position' => null], [], $now)['restingDays'];
+    check($days($now - 4 * 86400 + 1) === null, 'just under four days');
+    check($days($now - 4 * 86400) === 4, 'four days');
+    check($days($now - 6 * 86400 - 5) === 6, 'six days');
+    check($days(0) === null, 'never reported is not resting');
+};
