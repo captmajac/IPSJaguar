@@ -90,3 +90,14 @@ $tests['Tile: knows when the last report came with the ignition on'] = function 
     check(JlrTile::payload(['VehicleState' => 'KEY_OFF'], $info, [], 2000)['ignitionOn'] === false, 'key off');
     check(JlrTile::payload([], $info, [], 2000)['ignitionOn'] === false, 'unknown');
 };
+
+$tests['Tile: rates the fuel by level and range'] = function () {
+    $info = ['name' => '', 'online' => true, 'lastReport' => 1000, 'position' => null];
+    $state = fn(array $v) => JlrTile::payload($v, $info, [], 2000)['fuelState'];
+    check($state(['FuelLevel' => 60, 'FuelRange' => 210]) === 'ok', 'ok');
+    check($state(['FuelLevel' => 20, 'FuelRange' => 210]) === 'low', 'low level');
+    check($state(['FuelLevel' => 40, 'FuelRange' => 100]) === 'low', 'low range');
+    check($state(['FuelLevel' => 10, 'FuelRange' => 210]) === 'critical', 'critical level');
+    check($state(['FuelLevel' => 40, 'FuelRange' => 50]) === 'critical', 'critical range');
+    check($state([]) === 'ok', 'unknown is no warning');
+};

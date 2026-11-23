@@ -76,6 +76,7 @@ class JlrTile
             'lastReport'  => $info['lastReport'],
             'fuel'        => $values['FuelLevel'] ?? null,
             'range'       => $values['FuelRange'] ?? null,
+            'fuelState'   => self::fuelState($values['FuelLevel'] ?? null, $values['FuelRange'] ?? null),
             'odometer'    => $values['Odometer'] ?? null,
             'voltage'     => $values['BatteryVoltage'] ?? null,
             'service'     => $values['ServiceDistance'] ?? null,
@@ -93,6 +94,18 @@ class JlrTile
             'position'    => $position === null ? null : ['lat' => $position[0], 'lon' => $position[1]],
             'stats'       => self::statistics($days, $now),
         ];
+    }
+
+    // JLR send no fuel warning, so the tile rates level and range itself
+    private static function fuelState(?int $level, ?int $range): string
+    {
+        if (($level !== null && $level <= 10) || ($range !== null && $range <= 50)) {
+            return 'critical';
+        }
+        if (($level !== null && $level <= 20) || ($range !== null && $range <= 100)) {
+            return 'low';
+        }
+        return 'ok';
     }
 
     // names of the open doors or windows, null if the vehicle reports none of them
