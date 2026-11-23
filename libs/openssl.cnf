@@ -1,0 +1,6 @@
+# Minimal OpenSSL config for key and certificate creation.
+# Symcon's PHP may not find a system openssl.cnf, and openssl_csr_new needs one.
+[req]
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]

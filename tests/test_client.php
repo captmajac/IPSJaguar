@@ -121,3 +121,13 @@ $tests['Status: boot lock as its own value, TRUE or LOCKED'] = function () {
     check(JlrStatus::values(['Body.Trunk.Rear.IsLocked' => 'UNLOCKED'])['BootLocked'] === false, 'UNLOCKED');
     check(JlrStatus::values(['Body.Trunk.Rear.IsLocked' => 'LOCKED'])['BootLocked'] === true, 'LOCKED');
 };
+
+// Symcon's PHP may have no openssl.cnf; key and certificate must not depend on one
+$tests['Client: key and certificate work without a system OpenSSL config'] = function () {
+    $code = 'require ' . var_export(realpath(__DIR__ . '/../libs/DataHubClient.php'), true) . ';'
+        . '$c = DataHubClient::generateCredentials();'
+        . 'echo openssl_x509_check_private_key($c["certificate"], $c["private_key"]) ? "fits" : "wrong";'
+        . 'echo " ", (DataHubClient::certificateExpiry($c["certificate"]) > time() + 364 * 86400) ? "year" : "short";';
+    $out = (string) shell_exec('OPENSSL_CONF=/nonexistent/openssl.cnf ' . escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($code) . ' 2>&1');
+    check(trim($out) === 'fits year', trim($out));
+};

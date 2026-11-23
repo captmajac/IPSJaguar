@@ -45,10 +45,12 @@ class DataHubClient
     // ['private_key' => PEM, 'certificate' => PEM]: RSA key and the self-signed certificate the portal asks for
     public static function generateCredentials(): array
     {
-        $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
-        $csr = $key === false ? false : openssl_csr_new(['commonName' => 'IP-Symcon'], $key, ['digest_alg' => 'sha256']);
-        $cert = $csr === false ? false : openssl_csr_sign($csr, null, $key, self::CERTIFICATE_DAYS, ['digest_alg' => 'sha256'], random_int(1, PHP_INT_MAX));
-        if ($cert === false || !openssl_x509_export($cert, $certificate) || !openssl_pkey_export($key, $privateKey)) {
+        // own config: Symcon's PHP may not find a system openssl.cnf
+        $options = ['config' => __DIR__ . '/openssl.cnf', 'digest_alg' => 'sha256'];
+        $key = openssl_pkey_new($options + ['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+        $csr = $key === false ? false : openssl_csr_new(['commonName' => 'IP-Symcon'], $key, $options);
+        $cert = $csr === false ? false : openssl_csr_sign($csr, null, $key, self::CERTIFICATE_DAYS, $options, random_int(1, PHP_INT_MAX));
+        if ($cert === false || !openssl_x509_export($cert, $certificate) || !openssl_pkey_export($key, $privateKey, null, $options)) {
             throw new DataHubException('Could not create key and certificate: ' . openssl_error_string());
         }
         return ['private_key' => $privateKey, 'certificate' => $certificate];
