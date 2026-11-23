@@ -211,9 +211,9 @@ $tests['Vehicle: refused journeys are no read error'] = function () {
 
 $tests['Tile: counts as resting from four days without a report'] = function () {
     $now = 1000000;
-    $days = fn(int $report) => JlrTile::payload([], ['name' => '', 'online' => true, 'lastReport' => $report, 'position' => null], [], $now)['restingDays'];
-    check($days($now - 4 * 86400 + 1) === null, 'just under four days');
-    check($days($now - 4 * 86400) === 4, 'four days');
-    check($days($now - 6 * 86400 - 5) === 6, 'six days');
-    check($days(0) === null, 'never reported is not resting');
+    $resting = fn(int $report) => JlrTile::payload([], ['name' => '', 'online' => true, 'lastReport' => $report, 'position' => null], [], $now)['resting'];
+    check($resting($now - 4 * 86400 + 1) === false, 'just under four days');
+    check($resting($now - 4 * 86400) === true, 'four days');
+    check($resting($now - 6 * 86400 - 5) === true, 'six days');
+    check($resting(0) === false, 'never reported is not resting');
 };

@@ -77,7 +77,7 @@ class JlrTile
             'name'        => $info['name'],
             'online'      => $info['online'],
             'lastReport'  => $info['lastReport'],
-            'restingDays' => self::restingDays((int) $info['lastReport'], $now),
+            'resting'     => $info['lastReport'] > 0 && $now - $info['lastReport'] >= self::RESTING_AFTER_DAYS * 86400,
             'fuel'        => $values['FuelLevel'] ?? null,
             'range'       => $values['FuelRange'] ?? null,
             'fuelState'   => self::fuelState($values['FuelLevel'] ?? null, $values['FuelRange'] ?? null),
@@ -123,16 +123,6 @@ class JlrTile
         }
         krsort($out);
         return array_slice(array_values($out), 0, self::MAX_JOURNEYS);
-    }
-
-    // whole days without a report once the vehicle counts as resting, else null
-    private static function restingDays(int $lastReport, int $now): ?int
-    {
-        if ($lastReport <= 0) {
-            return null;
-        }
-        $days = (int) floor(($now - $lastReport) / 86400);
-        return $days >= self::RESTING_AFTER_DAYS ? $days : null;
     }
 
     // short text for the tile, without details of the request

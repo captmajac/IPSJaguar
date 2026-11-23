@@ -131,7 +131,7 @@
                 <div class="inner"><b id="fuel"></b><span id="range"></span></div>
             </div>
             <div class="facts">
-                <div class="fact" id="resting" title="Abgeleitet: Das Fahrzeug hat sich seit mindestens 4 Tagen nicht gemeldet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg><b>Ruhemodus<span class="factLabel" id="restingDays"></span></b></div>
+                <div class="fact" id="resting" title="Abgeleitet: Das Fahrzeug hat sich seit mindestens 4 Tagen nicht gemeldet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg><b>Ruhemodus</b></div>
                 <div class="fact" title="Kilometerstand"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 13l4-5"/><circle cx="12" cy="13" r="1"/><path d="M8 17h8"/></svg><b id="odometer"></b></div>
                 <div class="fact" title="12-V-Batterie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18v11H3z"/><path d="M7 8V5h3v3"/><path d="M14 8V5h3v3"/><path d="M6.5 13.5h3"/><path d="M14.5 13.5h3"/><path d="M16 12v3"/></svg><b><span class="factLabel">12-V-Batterie </span><span id="voltage"></span></b></div>
             </div>
@@ -271,8 +271,7 @@
         $('fuel').textContent = s.fuel === null ? '–' : s.fuel + ' %';
         $('range').textContent = unit(s.range, 'km');
         $('odometer').textContent = unit(s.odometer, 'km');
-        $('resting').style.display = s.restingDays === null ? 'none' : '';
-        $('restingDays').textContent = s.restingDays === null ? '' : ' · seit ' + s.restingDays + ' Tagen';
+        $('resting').style.display = s.resting ? '' : 'none';
         $('voltage').textContent = unit(s.voltage, 'V', 1);
 
         const chips = [];
