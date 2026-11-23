@@ -101,3 +101,92 @@ $tests['Tile: rates the fuel by level and range'] = function () {
     check($state(['FuelLevel' => 40, 'FuelRange' => 50]) === 'critical', 'critical range');
     check($state([]) === 'ok', 'unknown is no warning');
 };
+
+function journeyItem(string $start, string $end, $km = 42.5, array $extra = []): array
+{
+    return $extra + [
+        'journeyId'     => 'j' . $start,
+        'startTime'     => $start,
+        'endTime'       => $end,
+        'duration'      => 2700,
+        'distance'      => ['value' => $km, 'unit' => 'km'],
+        'averageSpeed'  => ['value' => 56.7, 'unit' => 'km/h'],
+        'startLocation' => ['latitude' => 50.111, 'longitude' => 8.611],
+        'endLocation'   => ['latitude' => 50.222, 'longitude' => 8.622],
+    ];
+}
+
+$tests['Journeys: newest first, in km and minutes, never with coordinates'] = function () {
+    $list = JlrTile::journeys(['items' => [
+        journeyItem('2026-11-01T08:00:00Z', '2026-11-01T08:45:00Z'),
+        journeyItem('2026-11-03T08:00:00Z', '2026-11-03T08:45:00Z', 1500, ['distance' => ['value' => 1500, 'unit' => 'm']]),
+        ['startTime' => 'broken'],
+    ]]);
+    check(count($list) === 2 && $list[0]['start'] === strtotime('2026-11-03T08:00:00Z'), 'order');
+    check($list[0]['km'] === 1.5 && $list[1]['km'] === 42.5, 'distance');
+    check($list[1]['minutes'] === 45 && $list[1]['speed'] === 56.7, 'duration and speed');
+    check(!str_contains(json_encode($list), '50.111') && !str_contains(json_encode($list), 'atitude'), 'no position');
+};
+
+$tests['Journeys: only the newest 30 are kept'] = function () {
+    $items = [];
+    for ($i = 1; $i <= 35; $i++) {
+        $items[] = journeyItem(gmdate('c', 1000000 + $i * 3600), gmdate('c', 1000000 + $i * 3600 + 60));
+    }
+    $list = JlrTile::journeys(['items' => $items]);
+    check(count($list) === 30 && $list[0]['start'] === 1000000 + 35 * 3600, 'newest 30');
+};
+
+$tests['Account: reads journeys with a clean proof URL, also from the last page'] = function () {
+    $pages = function (array $call) {
+        parse_str((string) parse_url($call['url'], PHP_URL_QUERY), $q);
+        $start = ($q['page'] ?? '0') === '0' ? '2026-11-01T08:00:00Z' : '2026-11-05T08:00:00Z';
+        return [200, json_encode(['items' => [journeyItem($start, $start)], 'page' => ['totalPages' => 3]])];
+    };
+    TestRegistry::$http = fakeHttp(['/journeys' => $pages]);
+    $a = makeAccount();
+    $items = ask($a, 'journeys', VIN)['data']['items'];
+    check(array_column($items, 'startTime') === ['2026-11-01T08:00:00Z', '2026-11-05T08:00:00Z'], json_encode(array_column($items, 'startTime')));
+    $call = calls('/journeys')[1];
+    check(str_contains($call['url'], 'page=2') && str_contains($call['url'], 'size=100'), $call['url']);
+    check(!str_contains(jwtParts($call['headers']['DPoP'])[1]['htu'], '?'), 'htu without query');
+};
+
+$tests['Vehicle: journeys reach the tile without coordinates and are not read on every update'] = function () {
+    TestRegistry::$http = fakeHttp(['/journeys' => [200, json_encode(['items' => [journeyItem('2026-11-04T15:00:00Z', '2026-11-04T15:45:00Z')]])]]);
+    $m = makeJaguar();
+    $p = json_decode(end($m->visu), true);
+    check($p['journeyState'] === 'ok' && count($p['journeys']) === 1 && $p['journeys'][0]['km'] === 42.5, 'in the tile');
+    check(!str_contains($m->attributes['Journeys'], '50.111'), 'nothing stored about the position');
+    $reads = count(calls('/journeys'));
+    TestRegistry::$now += 900;
+    $m->RequestAction('Update', '');
+    check(count(calls('/journeys')) === $reads, 'same report, read within the hour');
+    TestRegistry::$now += 3600;
+    $m->RequestAction('Update', '');
+    check(count(calls('/journeys')) === $reads + 1, 'read again after an hour');
+};
+
+$tests['Vehicle: refused journeys leave the status alone and are asked again daily'] = function () {
+    TestRegistry::$http = fakeHttp(['/journeys' => [403, '{"detail":"Access to category is not permitted for this vehicle"}']]);
+    $m = makeJaguar();
+    $p = json_decode(end($m->visu), true);
+    check($p['online'] === true && $p['journeyState'] === 'refused' && $p['journeys'] === [], 'still online');
+    $reads = count(calls('/journeys'));
+    TestRegistry::$now += 7200;
+    $m->RequestAction('Update', '');
+    check(count(calls('/journeys')) === $reads, 'not again within a day');
+    TestRegistry::$now += 86400;
+    $m->RequestAction('Update', '');
+    check(count(calls('/journeys')) === $reads + 1, 'again after a day');
+};
+
+$tests['Vehicle: a failed journey read keeps the last journeys'] = function () {
+    TestRegistry::$http = fakeHttp(['/journeys' => [200, json_encode(['items' => [journeyItem('2026-11-04T15:00:00Z', '2026-11-04T15:45:00Z')]])]]);
+    $m = makeJaguar();
+    TestRegistry::$http = fakeHttp(['/journeys' => [500, 'oops']]);
+    TestRegistry::$now += 3700;
+    $m->RequestAction('Update', '');
+    $p = json_decode(end($m->visu), true);
+    check($p['online'] === true && count($p['journeys']) === 1 && $p['journeyState'] === 'ok', 'kept');
+};

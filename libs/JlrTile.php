@@ -8,6 +8,7 @@ class JlrTile
 {
     const HISTORY_DAYS = 32;
     const CHART_DAYS = 30;
+    const MAX_JOURNEYS = 30;
 
     const SIDES = ['FrontLeft' => 'vorne links', 'FrontRight' => 'vorne rechts', 'RearLeft' => 'hinten links', 'RearRight' => 'hinten rechts'];
     const WARNINGS = [
@@ -93,7 +94,38 @@ class JlrTile
             'warnings'    => $warnings,
             'position'    => $position === null ? null : ['lat' => $position[0], 'lon' => $position[1]],
             'stats'       => self::statistics($days, $now),
+            'journeys'    => $info['journeys'] ?? [],
+            'journeyState' => $info['journeyState'] ?? 'unknown',
         ];
+    }
+
+    // journeys of the API, newest first; start and end position are left out on purpose
+    public static function journeys(array $answer): array
+    {
+        $out = [];
+        foreach ($answer['items'] ?? [] as $item) {
+            $start = strtotime((string) ($item['startTime'] ?? ''));
+            $end = strtotime((string) ($item['endTime'] ?? ''));
+            if ($start === false || $end === false) {
+                continue;
+            }
+            $out[$start] = [
+                'start'   => $start,
+                'end'     => $end,
+                'km'      => self::measure($item['distance'] ?? null, ['km' => 1.0, 'm' => 0.001, 'mi' => 1.609344]),
+                'minutes' => is_numeric($item['duration'] ?? null) ? (int) round($item['duration'] / 60) : (int) round(($end - $start) / 60),
+                'speed'   => self::measure($item['averageSpeed'] ?? null, ['km/h' => 1.0, 'm/s' => 3.6, 'mph' => 1.609344]),
+            ];
+        }
+        krsort($out);
+        return array_slice(array_values($out), 0, self::MAX_JOURNEYS);
+    }
+
+    // value in the wanted unit, null without a value or with an unknown unit
+    private static function measure($field, array $factors): ?float
+    {
+        $factor = $factors[strtolower((string) ($field['unit'] ?? ''))] ?? null;
+        return $factor === null || !is_numeric($field['value'] ?? null) ? null : round((float) $field['value'] * $factor, 1);
     }
 
     // JLR send no fuel warning, so the tile rates level and range itself

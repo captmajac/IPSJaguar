@@ -20,11 +20,16 @@ $values = [
     'DoorFrontLeft' => false, 'DoorFrontRight' => false, 'WindowFrontLeft' => false, 'WindowFrontRight' => false,
     'TyreFrontLeft' => 2.3, 'TyreFrontRight' => 2.3, 'TyreRearLeft' => 2.5, 'TyreRearRight' => 2.45,
 ];
-$info = ['name' => 'F-TYPE', 'online' => true, 'lastReport' => $now - 3600, 'position' => [50.94130, 6.95830]];
+$journeys = [];
+foreach ([[3, 42.5, 38, 67], [8, 12.3, 19, 39], [29, 141.0, 95, 89], [31, 7.8, 14, 33]] as [$hours, $km, $minutes, $speed]) {
+    $start = $now - $hours * 3600;
+    $journeys[] = ['start' => $start, 'end' => $start + $minutes * 60, 'km' => $km, 'minutes' => $minutes, 'speed' => (float) $speed];
+}
+$info = ['name' => 'F-TYPE', 'online' => true, 'lastReport' => $now - 3600, 'position' => [50.94130, 6.95830], 'journeys' => $journeys, 'journeyState' => 'ok'];
 $samples = [
     JlrTile::payload($values, $info, $days, $now),
     JlrTile::payload(['FuelLevel' => 8, 'DoorFrontRight' => true, 'WindowFrontLeft' => true, 'TyreLowRearLeft' => true, 'OilLow' => true, 'Locked' => false, 'BootLocked' => false] + $values, $info, $days, $now),
-    JlrTile::payload($values, ['online' => false] + $info, $days, $now),
+    JlrTile::payload($values, ['online' => false, 'journeys' => [], 'journeyState' => 'refused'] + $info, $days, $now),
     JlrTile::payload([], ['name' => '', 'online' => true, 'lastReport' => 0, 'position' => null], [], $now),
     JlrTile::payload(['Locked' => false, 'BootLocked' => false, 'VehicleState' => 'KEY_ON_ENGINE_OFF'] + $values, $info, $days, $now),
     JlrTile::payload(['FuelLevel' => 20, 'FuelRange' => 95] + $values, $info, $days, $now),

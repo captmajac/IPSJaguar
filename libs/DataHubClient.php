@@ -145,6 +145,19 @@ class DataHubClient
         return $this->get('/v1/vehicles/' . rawurlencode($vin), $accessToken);
     }
 
+    // JLR list journeys oldest first in practice, the API does not promise it: first and last page hold both ends
+    public function journeys(string $vin, string $accessToken): array
+    {
+        $path = '/v1/vehicles/' . rawurlencode($vin) . '/journeys?size=100&page=';
+        $first = $this->get($path . '0', $accessToken);
+        $items = $first['items'] ?? [];
+        $last = (int) ($first['page']['totalPages'] ?? 1) - 1;
+        if ($last > 0) {
+            $items = array_merge($items, $this->get($path . $last, $accessToken)['items'] ?? []);
+        }
+        return ['items' => $items];
+    }
+
     private function get(string $path, string $accessToken): array
     {
         $url = self::API . $path;
@@ -160,7 +173,7 @@ class DataHubClient
             break;
         }
         $body = json_decode($res['body'], true);
-        $what = basename($path);
+        $what = basename(explode('?', $path, 2)[0]);
         if ($res['status'] === 200 && is_array($body)) {
             return $body;
         }

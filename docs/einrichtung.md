@@ -43,7 +43,7 @@ Kopiert wird der ganze Block, von `-----BEGIN CERTIFICATE-----` bis einschließl
    | Position | Breiten- und Längengrad |
    | Attributes | Marke, Modell, Baujahr |
    | Diagnostics | derzeit ungenutzt, für spätere Erweiterungen |
-   | Journeys | derzeit ungenutzt |
+   | Journeys | Fahrtenbuch in der Kachel |
 
 5. Bei „Public key" bzw. „Public certificate" das Zertifikat aus Schritt 1 vollständig einfügen.
 6. Die Seite zeigt danach die **Client-ID**. Sie sieht aus wie `dsas-0123456789ab`.
@@ -84,7 +84,7 @@ Gemessen am F-Type:
 
 ### 7. Kachel anzeigen
 
-Die Instanz „Jaguar" in der Visualisierung (Kachel-Visualisierung) einfügen. Die Kachel zeigt die Tabs **Übersicht** und **Statistik**; die Statistik füllt sich ab jetzt mit jeder neuen Meldung des Fahrzeugs. Die Karte kommt von OpenStreetMap und bekommt dafür die Fahrzeugposition vom anzeigenden Browser. Ohne **Position lesen** entfällt sie.
+Die Instanz „Jaguar" in der Visualisierung (Kachel-Visualisierung) einfügen. Die Kachel zeigt die Tabs **Übersicht**, **Fahrtenbuch** und **Statistik**. Das Fahrtenbuch zeigt die letzten 30 Fahrten, soweit JLR sie für das Fahrzeug liefert, ohne Start- und Zielort; die Statistik füllt sich ab jetzt mit jeder neuen Meldung des Fahrzeugs. Die Karte kommt von OpenStreetMap und bekommt dafür die Fahrzeugposition vom anzeigenden Browser. Ohne **Position lesen** entfällt sie.
 
 ## Stolpersteine
 

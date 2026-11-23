@@ -18,7 +18,7 @@ Statuswerte eines Jaguar oder Land Rover aus dem **JLR Data Hub**. Das Modul lie
 - Reifendruck und Reifendruckwarnung je Rad
 - 12-V-Spannung, Warnungen für Wischwasser, Bremsflüssigkeit, Kühlmittel und Öl
 - Position
-- Kachel für die Visualisierung mit Übersicht, Karte und Kilometer-Statistik der letzten 30 Tage
+- Kachel für die Visualisierung mit Übersicht, Karte, Fahrtenbuch und Kilometer-Statistik der letzten 30 Tage
 
 ### 2. Voraussetzungen
 
@@ -48,7 +48,8 @@ Geliefert wird der zuletzt gemeldete Stand, das Fahrzeug wird nicht geweckt. Wie
 Die Instanz bringt eine eigene **Kachel** mit:
 
 - **Übersicht:** Tank, Reichweite, Kilometerstand, 12-V-Spannung, Verriegelung, Türen, Fenster, Reifendruck, Warnungen und Standort. Die Kachel zeigt nur an, denn die Schnittstelle kann das Fahrzeug nicht steuern.
-- **Statistik:** Kilometer je Tag der letzten 30 Tage. Sie wird aus den Änderungen des Kilometerstands berechnet und beginnt mit der Installation. Einzelne Fahrten stellt JLR für Besitzerkonten nicht bereit. Wird über mehrere Tage nichts gemeldet, zählt die Strecke auf den Tag der nächsten Meldung.
+- **Fahrtenbuch:** Die letzten 30 Fahrten mit Zeit, Strecke, Dauer und Durchschnittsgeschwindigkeit, soweit JLR sie für das Fahrzeug liefert. Start- und Zielort speichert das Modul bewusst nicht. Lehnt JLR die Abfrage ab, zeigt der Tab einen Hinweis und das Modul fragt einmal täglich erneut.
+- **Statistik:** Kilometer je Tag der letzten 30 Tage. Sie wird aus den Änderungen des Kilometerstands berechnet und beginnt mit der Installation. Wird über mehrere Tage nichts gemeldet, zählt die Strecke auf den Tag der nächsten Meldung.
 - **Karte:** Sie kommt von OpenStreetMap. Der Browser, der die Kachel anzeigt, überträgt dafür die Fahrzeugposition an OpenStreetMap. Wer das nicht möchte, schaltet **Position lesen** aus.
 
 ### 6. PHP-Befehlsreferenz

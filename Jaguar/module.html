@@ -87,11 +87,18 @@
     #jt .tiles .card { padding: 9px; text-align: center; }
     #jt .tiles b { display: block; font-size: 1.15em; }
     #jt .tiles small { font-size: 0.68em; opacity: 0.7; }
+    #jt .day { margin: 2px 0 -4px; font-size: 0.78em; font-weight: 700; letter-spacing: 0.04em; opacity: 0.7; }
+    #jt .trip { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    #jt .trip div { min-width: 0; }
+    #jt .trip b { display: block; font-weight: 600; }
+    #jt .trip small { display: block; font-size: 0.78em; opacity: 0.7; }
+    #jt .trip .km { flex: none; font-size: 1.05em; font-weight: 700; }
     #jt .compact { display: none; flex: 1; align-items: center; gap: 12px; min-height: 0; }
     #jt .compact b { font-size: 1.6em; }
     #jt .compact div { min-width: 0; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @media (max-width: 340px) {
         #jt .standLabel, #jt .factLabel { display: none; }
+        #jt .tabs button { flex: 1 1 auto; padding: 5px 2px; font-size: 0.8em; }
         #jt .ring { width: 96px; height: 96px; }
         #jt .ring b { font-size: 1.3em; }
         #jt .ring span { font-size: 0.75em; }
@@ -114,6 +121,7 @@
     </div>
     <div class="tabs">
         <button id="tabOverview" class="active" onclick="showTab('Overview')">Übersicht</button>
+        <button id="tabJourneys" onclick="showTab('Journeys')">Fahrtenbuch</button>
         <button id="tabStats" onclick="showTab('Stats')">Statistik</button>
     </div>
     <div class="page active" id="pageOverview">
@@ -141,6 +149,7 @@
             <div class="where"><span id="where"></span><a id="mapLink" target="_blank" rel="noopener noreferrer">Karte öffnen</a></div>
         </div>
     </div>
+    <div class="page" id="pageJourneys"></div>
     <div class="page" id="pageStats">
         <div class="card">
             <h3 id="dayLabel"></h3>
@@ -153,7 +162,7 @@
             <div class="card"><b id="perDay"></b><small>km je Fahrtag</small></div>
             <div class="card"><b id="drivingDays"></b><small>Fahrtage</small></div>
         </div>
-        <div class="hint">Aus den Änderungen des Kilometerstands berechnet. Einzelne Fahrten stellt JLR nicht bereit.</div>
+        <div class="hint">Aus den Änderungen des Kilometerstands berechnet.</div>
     </div>
     <div class="compact">
         <b id="smallFuel"></b>
@@ -206,7 +215,7 @@
     }
 
     function showTab(tab) {
-        ['Overview', 'Stats'].forEach(t => {
+        ['Overview', 'Journeys', 'Stats'].forEach(t => {
             $('tab' + t).classList.toggle('active', t === tab);
             $('page' + t).classList.toggle('active', t === tab);
         });
@@ -359,6 +368,42 @@
         $('mapFrame').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + encodeURIComponent(mapKey);
     }
 
+    function clock(ts) {
+        const d = new Date(ts * 1000);
+        return two(d.getHours()) + ':' + two(d.getMinutes());
+    }
+
+    function span(minutes) {
+        return minutes < 60 ? minutes + ' min' : Math.floor(minutes / 60) + ' h ' + (minutes % 60) + ' min';
+    }
+
+    function renderJourneys(s) {
+        const box = $('pageJourneys');
+        if (!s.journeys.length) {
+            box.replaceChildren(el('div', 'card hint', s.journeyState === 'refused'
+                ? 'JLR gibt für dieses Fahrzeug derzeit keine Fahrten frei. Das Modul fragt einmal täglich erneut.'
+                : 'Noch keine Fahrten vorhanden. Neue Fahrten erscheinen einige Minuten nach dem Abstellen.'));
+            return;
+        }
+        const nodes = [];
+        let day = '';
+        s.journeys.forEach(j => {
+            const label = new Date(j.start * 1000).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+            if (label !== day) {
+                day = label;
+                nodes.push(el('div', 'day', label));
+            }
+            const details = [span(j.minutes)];
+            if (j.speed !== null) details.push('Ø ' + number(j.speed) + ' km/h');
+            const left = el('div');
+            left.append(el('b', '', clock(j.start) + ' – ' + clock(j.end)), el('small', '', details.join(' · ')));
+            const trip = el('div', 'card trip');
+            trip.append(left, el('span', 'km', j.km === null ? '–' : number(j.km, 1) + ' km'));
+            nodes.push(trip);
+        });
+        box.replaceChildren(...nodes);
+    }
+
     function renderDay() {
         const day = state.stats.days.find(d => d.date === selected);
         if (!day) return;
@@ -399,6 +444,7 @@
         $('pill').classList.toggle('on', s.online);
         $('pillText').textContent = s.online ? 'Online' : 'Offline';
         renderOverview(s);
+        renderJourneys(s);
         renderStats(s);
         $('smallFuel').textContent = s.fuel === null ? '–' : s.fuel + ' %';
         const parts = [unit(s.range, 'km')];

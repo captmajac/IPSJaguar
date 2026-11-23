@@ -94,7 +94,7 @@ class JaguarAccount extends IPSModule
         }
     }
 
-    // Request of a vehicle instance: Buffer {"method": "vehicles" | "vehicle" | "status" | "location", "vin": ...}
+    // Request of a vehicle instance: Buffer {"method": "vehicles" | "vehicle" | "status" | "location" | "journeys", "vin": ...}
     // Answer: {"data": ...} or {"error": message, "kind": "auth" | "forbidden" | "api"}
     public function ForwardData($JSONString)
     {
@@ -106,6 +106,7 @@ class JaguarAccount extends IPSModule
                 case 'vehicle':
                 case 'status':
                 case 'location':
+                case 'journeys':
                     return json_encode(['data' => $this->read($request['method'], (string) ($request['vin'] ?? ''))]);
             }
             throw new DataHubException('Unknown request');

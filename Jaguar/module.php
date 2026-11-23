@@ -17,6 +17,8 @@ class Jaguar extends IPSModule
     const ACCOUNT_MODULE = '{CBB7885A-80DA-46AC-8D93-8F1651E76565}';
     const TO_PARENT = '{60CFED1E-F398-4D76-B7D3-F82F4A49F10C}';
     const REFRESH_THROTTLE_S = 60;
+    const JOURNEY_INTERVAL_S = 3600;
+    const JOURNEY_REFUSED_INTERVAL_S = 86400;
 
     public function Create()
     {
@@ -37,6 +39,11 @@ class Jaguar extends IPSModule
         // model as JLR name it, once per vehicle
         $this->RegisterAttributeString('VehicleName', '');
         $this->RegisterAttributeInteger('LastFetch', 0);
+        // journeys without positions, see JlrTile::journeys; state: unknown, ok or refused
+        $this->RegisterAttributeString('Journeys', '[]');
+        $this->RegisterAttributeString('JourneyState', 'unknown');
+        $this->RegisterAttributeInteger('JourneyFetch', 0);
+        $this->RegisterAttributeInteger('JourneyReport', 0);
 
         $this->SetVisualizationType(1);
 
@@ -177,6 +184,8 @@ class Jaguar extends IPSModule
             'online'     => $this->GetStatus() === 102,
             'lastReport' => @$this->GetIDForIdent('LastUpdate') === false ? 0 : (int) $this->GetValue('LastUpdate'),
             'position'   => $position,
+            'journeys'   => json_decode($this->ReadAttributeString('Journeys'), true) ?: [],
+            'journeyState' => $this->ReadAttributeString('JourneyState'),
         ], json_decode($this->ReadAttributeString('Days'), true) ?: [], $this->now());
     }
 
@@ -236,6 +245,7 @@ class Jaguar extends IPSModule
                     $this->SendDebug('Position', $e->getMessage(), 0);
                 }
             }
+            $this->readJourneys();
             $this->SetStatus(102);
             return true;
         } catch (DataHubAuthException $e) {
@@ -246,6 +256,30 @@ class Jaguar extends IPSModule
             $this->LogMessage($e->getMessage(), KL_WARNING);
         }
         return false;
+    }
+
+    // an extra: whatever goes wrong here leaves the status of the instance alone
+    private function readJourneys(): void
+    {
+        $age = $this->now() - $this->ReadAttributeInteger('JourneyFetch');
+        $report = (int) $this->GetValue('LastUpdate');
+        $due = $this->ReadAttributeString('JourneyState') === 'refused'
+            ? $age >= self::JOURNEY_REFUSED_INTERVAL_S
+            : ($report !== $this->ReadAttributeInteger('JourneyReport') || $age >= self::JOURNEY_INTERVAL_S);
+        if (!$due) {
+            return;
+        }
+        $this->WriteAttributeInteger('JourneyFetch', $this->now());
+        $this->WriteAttributeInteger('JourneyReport', $report);
+        try {
+            $this->WriteAttributeString('Journeys', json_encode(JlrTile::journeys($this->api('journeys'))));
+            $this->WriteAttributeString('JourneyState', 'ok');
+        } catch (DataHubForbiddenException $e) {
+            $this->WriteAttributeString('JourneyState', 'refused');
+            $this->SendDebug('Journeys', $e->getMessage(), 0);
+        } catch (DataHubException $e) {
+            $this->SendDebug('Journeys', $e->getMessage(), 0);
+        }
     }
 
     private function vinOptions(): array
